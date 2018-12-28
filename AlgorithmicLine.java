@@ -18,7 +18,7 @@ public class AlgorithmicLine extends AlgorithmicShape {
     private int endDy;
 
     // constructors
-    public AlgorithmicLine(int startX, int startY, int endX, int endY, int startDx, int startDy, int endDx, int endDy, int iterations) {
+    public AlgorithmicLine(int startX, int startY, int endX, int endY, int startDx, int startDy, int endDx, int endDy, int iterations, String name) {
         this.startX = startX;
         this.startY = startY;
         this.endX = endX;
@@ -28,6 +28,7 @@ public class AlgorithmicLine extends AlgorithmicShape {
         this.endDx = endDx;
         this.endDy = endDy;
         this.setIterations(iterations);
+        this.setName(name);
     }
 
     /**
@@ -35,7 +36,7 @@ public class AlgorithmicLine extends AlgorithmicShape {
      */
     @Override
     public void draw(Pane viewer) {
-        draw(viewer, startX, startY,  endX, endY, this.getIterations());
+        draw(viewer, startX, startY, endX, endY, this.getIterations());
     }
 
     private void draw(Pane viewer, int startX, int startY, int endX, int endY, int remainingTterations) {

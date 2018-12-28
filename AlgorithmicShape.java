@@ -6,6 +6,7 @@ import javafx.scene.layout.Pane;
  * @author Charles Vidro
  */
 public abstract class AlgorithmicShape {
+    private String name;
     private int iterations;
     private int scaleFactor;
     private int rotation;
@@ -15,6 +16,14 @@ public abstract class AlgorithmicShape {
     private int colorA;
 
     // getters and setters
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public int getIterations() {
         return iterations;
     }
