@@ -1,7 +1,8 @@
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.transform.Rotate;
+
+import java.util.ArrayList;
 
 /**
  * AlgorithmicLine object
@@ -102,21 +103,23 @@ public class AlgorithmicLine extends AlgorithmicShape {
      * Draws the complete set of shapes for this algorithmic shape. A helper method will be needed.
      */
     @Override
-    public Pane draw(Pane viewer) {
+    public Pane draw(Pane viewer, ArrayList<Pane> paneList) {
         Pane layerPane = new Pane();
-        return draw(viewer, layerPane, startX, startY, endX, endY, this.getIterations());
+        return draw(viewer, layerPane, paneList, startX, startY, endX, endY, this.getIterations());
     }
 
-    private Pane draw(Pane viewer, Pane layerPane, int startX, int startY, int endX, int endY, int remainingIterations) {
+    private Pane draw(Pane viewer, Pane layerPane, ArrayList<Pane> paneList, int startX, int startY, int endX, int endY, int remainingIterations) {
         if (remainingIterations > 0) {
             Line line = new Line(startX, startY, endX, endY);
             line.translateXProperty().bind(viewer.widthProperty().divide(2.0));
             line.translateYProperty().bind(viewer.heightProperty().divide(2.0));
             line.setFill(Color.BLACK);
             layerPane.getChildren().add(line);
-            return draw(viewer, layerPane, startX + startDx, startY + startDy, endX + endDx, endY + endDy, --remainingIterations);
+            return draw(viewer, layerPane, paneList, startX + startDx, startY + startDy, endX + endDx, endY + endDy, --remainingIterations);
         } else {
             viewer.getChildren().addAll(layerPane);
+            paneList.add(layerPane);
+            System.out.println("\nAdded: " + layerPane.toString());
             return layerPane;
         }
     }

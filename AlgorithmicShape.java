@@ -1,5 +1,7 @@
 import javafx.scene.layout.Pane;
 
+import java.util.ArrayList;
+
 /**
  * Basic properties of an algorithmic shape
  *
@@ -85,5 +87,5 @@ public abstract class AlgorithmicShape {
     /**
      * Draws the complete set of shapes for this algorithmic shape. A helper method will be needed.
      */
-    public abstract Pane draw(Pane viewer);
+    public abstract Pane draw(Pane viewer, ArrayList<Pane> paneList);
 }
