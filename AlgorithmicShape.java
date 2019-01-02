@@ -85,5 +85,5 @@ public abstract class AlgorithmicShape {
     /**
      * Draws the complete set of shapes for this algorithmic shape. A helper method will be needed.
      */
-    public abstract void draw(Pane viewer);
+    public abstract Pane draw(Pane viewer);
 }

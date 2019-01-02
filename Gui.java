@@ -1,9 +1,3 @@
-/**
- * Gui for algorithmic art application
- *
- * @author Charles Vidro
- */
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,13 +11,21 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+
+/**
+ * Gui for algorithmic art application
+ *
+ * @author Charles Vidro
+ */
 public class Gui extends Application {
+    // GUI Variables
     private BorderPane mainWindow = new BorderPane();
-    private Pane viewer = new Pane();
+    private StackPane viewer = new StackPane();
     private HBox MenuBar = new HBox();
     private Scene primaryScene;
     private Stage primaryStage;
-    private Text ArtTitle = new Text("Default Art Title");
+    private Text ArtTitle = new Text("unnamed");
     private ScrollPane layers = new ScrollPane();
     private HBox layersAndFiles = new HBox();
     private VBox layerContainer = new VBox();
@@ -33,6 +35,10 @@ public class Gui extends Application {
     private VBox fileContainer = new VBox();
     private VBox filesTitleandFiles = new VBox();
 
+    // DATA Variables
+    private ArrayList<AlgorithmicShape> algorithmicShapes = new ArrayList<>();
+    private ArrayList<AlgorithmicShape> shapePreviewReferences = new ArrayList<>();
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -40,12 +46,14 @@ public class Gui extends Application {
     /**
      * JavaFX setup window
      *
-     * @param primaryStage
+     * @param primaryStage the primary window stage
      */
     @Override
     public void start(Stage primaryStage) {
+
         // Color palette
-        Background DarkGreyBackground = new Background(new BackgroundFill(new Color(0.28, 0.28, 0.28, 1.0), CornerRadii.EMPTY, Insets.EMPTY));
+        Background DarkGreyBackground = new Background(new BackgroundFill(new Color(0.28, 0.28, 0.28,
+                1.0), CornerRadii.EMPTY, Insets.EMPTY));
 
         // setting window spaces
         mainWindow.setLeft(viewer);
@@ -59,7 +67,6 @@ public class Gui extends Application {
         viewer.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
         viewer.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
         viewer.setStyle("-fx-border-color: green;");
-
 
         // Menu bar edits
         MenuBar.setAlignment(Pos.CENTER);
@@ -92,11 +99,12 @@ public class Gui extends Application {
         layers.setStyle("-fx-font-size: 18px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-border-color: red;");
         layers.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
         layers.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
+        layers.minHeightProperty().bind(mainWindow.heightProperty().subtract(MenuBar.heightProperty().add(300)));
         layers.setContent(layerContainer);
-
-        for (int i = 0; i < 30; i++) {
-            layerContainer.getChildren().add(new Text(i + ""));
-        }
+        layerContainer.setBackground(DarkGreyBackground);
+        layerContainer.minWidthProperty().bind(layers.minWidthProperty());
+        layerContainer.maxWidthProperty().bind(layers.minWidthProperty());
+        layerContainer.minHeightProperty().bind(layers.minHeightProperty().subtract(5));
 
         // Files
         Text fileTitle = new Text("Files");
@@ -108,6 +116,7 @@ public class Gui extends Application {
         files.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
         files.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
         files.setContent(fileContainer);
+
 
         // stage & scene edits
         this.primaryStage = primaryStage;
@@ -242,29 +251,16 @@ public class Gui extends Application {
 
         pane.add(getNewShapeSpacer(), 0, 9);
 
+        // preview references (one preview new shape window at a time. . .)
+        AlgorithmicLine[] previousPreview = {null};
+        Pane[] previousPreviewPane = {null};
+        Text[] previousThisLineName = {null};
+
         Button preview = new Button("Preview");
         preview.setOnAction(event -> {
-            if (startX.getText() == null || !isNumeric(startX.getText())) {
-                // exit action
-            } else if (startY.getText() == null || !isNumeric(startY.getText())) {
-                // exit action
-            } else if (endX.getText() == null || !isNumeric(endX.getText())) {
-                // exit action
-            } else if (endY.getText() == null || !isNumeric(endY.getText())) {
-                // exit action
-            } else if (startChangeInX.getText() == null || !isNumeric(startChangeInX.getText())) {
-                // exit action
-            } else if (startChangeInY.getText() == null || !isNumeric(startChangeInY.getText())) {
-                // exit action
-            } else if (endChangeInX.getText() == null || !isNumeric(endChangeInX.getText())) {
-                // exit action
-            } else if (endChangeInY.getText() == null || !isNumeric(endChangeInY.getText())) {
-                // exit action
-            } else if (iterations.getText() == null || !isNumeric(iterations.getText())) {
-                // exit action
-            } else if (lineName == null) {
-                // exit action
-            } else {
+            if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
+                    startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), lineName.getText())) {
+
                 AlgorithmicLine line = new AlgorithmicLine(
                         Integer.parseInt(startX.getText()),
                         Integer.parseInt(startY.getText()),
@@ -275,31 +271,180 @@ public class Gui extends Application {
                         Integer.parseInt(endChangeInX.getText()),
                         Integer.parseInt(endChangeInY.getText()),
                         Integer.parseInt(iterations.getText()),
-                        lineName.getText()
-                );
+                        lineName.getText());
 
-                line.draw(viewer);
+                if (previousPreview[0] == null) {
+                    // brand new preview
+                    previousPreview[0] = line;
+                    algorithmicShapes.add(line);
+                    shapePreviewReferences.add(line);
+
+                    previousThisLineName[0] = new Text(line.getName());
+                    previousThisLineName[0].setFill(Color.WHITE);
+                    previousThisLineName[0].setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                    layerContainer.getChildren().add(previousThisLineName[0]);
+
+                    previousPreviewPane[0] = line.draw(viewer);
+                    System.out.println("Line " + line.getName() + " previewed!");
+                } else {
+                    // remove old references
+                    viewer.getChildren().remove(previousPreviewPane[0]);
+                    shapePreviewReferences.remove(previousPreview[0]);
+                    algorithmicShapes.remove(previousPreview[0]);
+
+                    // add new references
+                    previousPreview[0] = line;
+                    algorithmicShapes.add(line);
+                    shapePreviewReferences.add(line);
+
+                    // update text name
+                    previousThisLineName[0].setText(line.getName());
+
+                    previousPreviewPane[0] = line.draw(viewer);
+                    System.out.println("Line " + line.getName() + " previewed!");
+                }
             }
         });
-        pane.add(preview, 2, 10);
-
+        pane.add(preview, 0, 10);
 
         Button save = new Button("Save");
         save.setOnAction(event -> {
+            // situation 1: user saved with incorrect parameters
+            // situation 2: correct parameters, same name as another shape (not the one previewed)
+            // situation 3: correct parameters, matches another line (not the one previewed)
+            // situation 4: user previewed, then saved with no change
+            // situation 5: user previewed, made a change, then saved
+            // situation 6: user saved with no preview
 
+            if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
+                    startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), lineName.getText())) {
+
+                AlgorithmicLine line = new AlgorithmicLine(
+                        Integer.parseInt(startX.getText()),
+                        Integer.parseInt(startY.getText()),
+                        Integer.parseInt(endX.getText()),
+                        Integer.parseInt(endY.getText()),
+                        Integer.parseInt(startChangeInX.getText()),
+                        Integer.parseInt(startChangeInY.getText()),
+                        Integer.parseInt(endChangeInX.getText()),
+                        Integer.parseInt(endChangeInY.getText()),
+                        Integer.parseInt(iterations.getText()),
+                        lineName.getText());
+
+                // check if the name of this shape is already stored or it is the same as another line (excluding the preview)
+                for (AlgorithmicShape shape : algorithmicShapes) {
+                    // name is already stored
+                    if (shape != previousPreview[0] && shape.getName().equals(lineName.getText())) {
+                        // do NOT save, exit the method
+                        System.out.println("Another shape named " + lineName.getText() + " exists!");
+                        return;
+                    }
+                    // Does this new line match the parameters of another line (duplicate line)?
+                    try {
+                        AlgorithmicLine comparisonLine = (AlgorithmicLine) shape;
+
+                        // make sure the preview is not tested
+                        if (shape != previousPreview[0]) {
+                            // test if ALL parameters are the same
+                            if (line.getStartX() == comparisonLine.getStartX() && line.getStartY() == comparisonLine.getStartY()
+                                    && line.getEndX() == comparisonLine.getEndX() && line.getEndY() == comparisonLine.getEndY()
+                                    && line.getStartDx() == comparisonLine.getStartDx() && line.getStartDy() == comparisonLine.getStartDy()
+                                    && line.getEndDx() == comparisonLine.getEndDx() && line.getEndDy() == comparisonLine.getEndDy()
+                                    && line.getIterations() == comparisonLine.getIterations()) {
+                                System.out.println("Another line with these parameters exists!");
+                                return;
+                            }
+                        }
+                    } catch (ClassCastException e) {
+                        // go on to the next object
+                    }
+                }
+
+                // user did not preview
+                if (previousPreview[0] == null) {
+                    // this is a new line
+                    algorithmicShapes.add(line);
+                    Text thisLineName = new Text(line.getName());
+                    thisLineName.setFill(Color.WHITE);
+                    thisLineName.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                    layerContainer.getChildren().add(thisLineName);
+                }
+                // preview has the exact same contents as the to-save line
+                else if (line.getStartX() == previousPreview[0].getStartX() && line.getStartY() == previousPreview[0].getStartY()
+                        && line.getEndX() == previousPreview[0].getEndX() && line.getEndY() == previousPreview[0].getEndY()
+                        && line.getStartDx() == previousPreview[0].getStartDx() && line.getStartDy() == previousPreview[0].getStartDy()
+                        && line.getEndDx() == previousPreview[0].getEndDx() && line.getEndDy() == previousPreview[0].getEndDy()
+                        && line.getIterations() == previousPreview[0].getIterations() && line.getName().equals(previousPreview[0].getName())) {
+                    // do nothing exit
+                }
+                // preview is different then the to-save line
+                else {
+                    // remove old references
+                    viewer.getChildren().remove(previousPreviewPane[0]);
+                    algorithmicShapes.remove(previousPreview[0]);
+
+                    // add new references
+                    algorithmicShapes.add(line);
+
+                    // update text name
+                    previousThisLineName[0].setText(line.getName());
+                }
+
+                line.draw(viewer);
+                System.out.println("Line " + line.getName() + " saved!");
+
+                // reset references, close window
+                shapePreviewReferences.remove(previousPreview[0]);
+                previousPreview[0] = null;
+                previousPreviewPane[0] = null;
+                previousThisLineName[0] = null;
+                newLineWindow.close();
+            }
         });
-
+        pane.add(save, 2, 10);
 
         Button cancel = new Button("Cancel");
         cancel.setOnAction(event -> {
+            if (previousPreview[0] != null) {
+                viewer.getChildren().remove(previousPreviewPane[0]);
+                shapePreviewReferences.remove(previousPreview[0]);
+                algorithmicShapes.remove(previousPreview[0]);
+                layerContainer.getChildren().remove(previousThisLineName[0]);
+                previousPreview[0] = null;
+                previousPreviewPane[0] = null;
+                previousThisLineName[0] = null;
+                previousThisLineName[0] = null;
+            }
+
             newLineWindow.close();
         });
         pane.add(cancel, 4, 10);
 
-        Scene mainWindow = new Scene(pane, 500, 500);
+        Scene mainWindow = new Scene(pane, 600, 400);
         newLineWindow.setScene(mainWindow);
         newLineWindow.setTitle("Algorithmic Art - Add New Line");
         newLineWindow.show();
+    }
+
+    private Boolean isValidLine(String startX, String startY, String endX, String endY, String startChangeInX,
+                                String startChangeInY, String endChangeInX, String endChangeInY, String iterations,
+                                String lineName) {
+
+        if (startX != null && isNumeric(startX)
+                && startY != null && isNumeric(startY)
+                && endX != null && isNumeric(endX)
+                && endY != null && isNumeric(endY)
+                && startChangeInX != null && isNumeric(startChangeInX)
+                && startChangeInY != null && isNumeric(startChangeInY)
+                && endChangeInX != null && isNumeric(endChangeInX)
+                && endChangeInY != null && isNumeric(endChangeInY)
+                && iterations != null && isNumeric(iterations)
+                && lineName != null) {
+            return true;
+        }
+
+        System.out.println("This line does not have valid parameters!");
+        return false;
     }
 
     private Region getNewShapeSpacer() {
@@ -313,11 +458,10 @@ public class Gui extends Application {
 
     private boolean isNumeric(String str) {
         try {
-            int test = Integer.parseInt(str);
+            Integer.parseInt(str);
         } catch (NumberFormatException e) {
             return false;
         }
-
         return true;
     }
 }
