@@ -40,7 +40,7 @@ public class Gui extends Application {
     // DATA Variables
     private ArrayList<AlgorithmicShape> algorithmicShapes = new ArrayList<>();
     private ArrayList<Text> layerTextList = new ArrayList<>();
-    private ArrayList<Pane> shapePanes = new ArrayList<>();
+    private ArrayList<Pane> layerPanes = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -53,7 +53,6 @@ public class Gui extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
-
         // Color palette
         Background DarkGreyBackground = new Background(new BackgroundFill(new Color(0.28, 0.28, 0.28,
                 1.0), CornerRadii.EMPTY, Insets.EMPTY));
@@ -62,6 +61,7 @@ public class Gui extends Application {
         mainWindow.setLeft(viewer);
         mainWindow.setTop(MenuBar);
         mainWindow.setRight(layersAndFiles);
+        layersAndFiles.setBackground(DarkGreyBackground);
         layersAndFiles.getChildren().addAll(shapeAndLayers, filesTitleAndFiles);
         shapeAndLayers.setSpacing(10);
         shapeAndLayers.setAlignment(Pos.TOP_CENTER);
@@ -191,9 +191,9 @@ public class Gui extends Application {
         Button preview = (Button) lineStageElements[12];
         Button save = (Button) lineStageElements[13];
         Button cancel = (Button) lineStageElements[14];
-        AlgorithmicLine[] previousPreview = (AlgorithmicLine[]) lineStageElements[15];
+        //AlgorithmicLine[] previousPreview = (AlgorithmicLine[]) lineStageElements[15];
         Pane[] previousPreviewPane = (Pane[]) lineStageElements[16];
-        Text[] previousThisLineName = (Text[]) lineStageElements[17];
+        //Text[] previousThisLineName = (Text[]) lineStageElements[17];
 
         // old data
         AlgorithmicLine[] outdatedLine = {null};
@@ -255,7 +255,7 @@ public class Gui extends Application {
                 updateLineAlgorithm(adjustedLine.getName());
             }
         });
-        Pane[] adjustedPane = {adjustedLine.draw(viewer, shapePanes)};
+        Pane[] adjustedPane = {adjustedLine.draw(viewer, layerPanes)};
 
         // add new data to be displayed and stored in data lists
         algorithmicShapes.add(adjustedLine);
@@ -269,13 +269,12 @@ public class Gui extends Application {
         viewer.getChildren().remove(previousPreviewPane[0]);
 
         //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
         int oldIndex = viewer.getChildren().indexOf(outdatedLine);
 
         Object[] viewerTest = viewer.getChildren().toArray();
         System.out.println("\nBefore: ");
         for (Object o : viewerTest) {
-            System.out.print(((Pane) o) + " ");
+            System.out.print(o + " ");
         }
 
         System.out.println("\n\nAttempting to remove " + lineStageElements[16].toString());
@@ -284,8 +283,9 @@ public class Gui extends Application {
         viewerTest = viewer.getChildren().toArray();
         System.out.println("\nAfter: ");
         for (Object o : viewerTest) {
-            System.out.print(((Pane) o) + " ");
+            System.out.print((o) + " ");
         }
+        //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
         // update buttons
         preview.setOnAction(event -> {
@@ -305,7 +305,7 @@ public class Gui extends Application {
                 adjustedText.setText(thisLineName.getText());
 
                 viewer.getChildren().remove(adjustedPane[0]);
-                adjustedPane[0] = adjustedLine.draw(viewer, shapePanes);
+                adjustedPane[0] = adjustedLine.draw(viewer, layerPanes);
             }
         });
 
@@ -326,7 +326,7 @@ public class Gui extends Application {
                 adjustedText.setText(thisLineName.getText());
 
                 viewer.getChildren().remove(adjustedPane[0]);
-                adjustedPane[0] = adjustedLine.draw(viewer, shapePanes);
+                adjustedPane[0] = adjustedLine.draw(viewer, layerPanes);
 
 
                 updateLineWindow.close();
@@ -344,7 +344,7 @@ public class Gui extends Application {
             algorithmicShapes.add(outdatedLine[0]);
             layerContainer.getChildren().add(outdatedText[0]);
             layerTextList.add(outdatedText[0]);
-            outdatedLine[0].draw(viewer, shapePanes);
+            outdatedLine[0].draw(viewer, layerPanes);
 
             updateLineWindow.close();
         });
@@ -540,12 +540,12 @@ public class Gui extends Application {
                     layerContainer.getChildren().add(previousThisLineName[0]);
                     layerTextList.add(previousThisLineName[0]);
 
-                    previousPreviewPane[0] = line.draw(viewer, shapePanes);
+                    previousPreviewPane[0] = line.draw(viewer, layerPanes);
                     System.out.println("Line " + line.getName() + " previewed!");
                 } else {
                     // remove old references
                     viewer.getChildren().remove(previousPreviewPane[0]);
-                    shapePanes.remove(previousPreviewPane[0]);
+                    layerPanes.remove(previousPreviewPane[0]);
                     algorithmicShapes.remove(previousPreview[0]);
 
                     // add new references
@@ -555,7 +555,7 @@ public class Gui extends Application {
                     // update text name
                     previousThisLineName[0].setText(line.getName());
 
-                    previousPreviewPane[0] = line.draw(viewer, shapePanes);
+                    previousPreviewPane[0] = line.draw(viewer, layerPanes);
                     System.out.println("Line " + line.getName() + " previewed!");
                 }
             }
@@ -577,7 +577,7 @@ public class Gui extends Application {
                 if (previousPreviewPane[0] != null) {
                     System.out.println("\nAttempting to remove " + previousPreviewPane[0].toString());
                     viewer.getChildren().remove(previousPreviewPane[0]);
-                    shapePanes.remove(previousPreviewPane[0]);
+                    layerPanes.remove(previousPreviewPane[0]);
                 }
 
                 AlgorithmicLine line = new AlgorithmicLine(
@@ -642,13 +642,13 @@ public class Gui extends Application {
                         && line.getStartDx() == previousPreview[0].getStartDx() && line.getStartDy() == previousPreview[0].getStartDy()
                         && line.getEndDx() == previousPreview[0].getEndDx() && line.getEndDy() == previousPreview[0].getEndDy()
                         && line.getIterations() == previousPreview[0].getIterations() && line.getName().equals(previousPreview[0].getName())) {
-                    // do nothing exit
+                    // do nothing
                 }
                 // preview is different then the to-save line
                 else {
                     // remove old references
                     viewer.getChildren().remove(previousPreviewPane[0]);
-                    shapePanes.remove(previousPreviewPane[0]);
+                    layerPanes.remove(previousPreviewPane[0]);
                     algorithmicShapes.remove(previousPreview[0]);
 
                     // add new references
@@ -658,7 +658,7 @@ public class Gui extends Application {
                     previousThisLineName[0].setText(line.getName());
                 }
 
-                previousPreviewPane[0] = line.draw(viewer, shapePanes);
+                previousPreviewPane[0] = line.draw(viewer, layerPanes);
                 System.out.println("Line " + line.getName() + " saved!");
 
 //                // reset references, close window
@@ -669,7 +669,7 @@ public class Gui extends Application {
                 Object[] viewerTest = viewer.getChildren().toArray();
                 System.out.println("\npost-save: ");
                 for (Object o : viewerTest) {
-                    System.out.print(((Pane) o) + " ");
+                    System.out.print(o + " ");
                 }
 
                 newLineWindow.close();
@@ -681,7 +681,7 @@ public class Gui extends Application {
         cancel.setOnAction(event -> {
             if (previousPreview[0] != null) {
                 viewer.getChildren().remove(previousPreviewPane[0]);
-                shapePanes.remove(previousPreviewPane[0]);
+                layerPanes.remove(previousPreviewPane[0]);
                 algorithmicShapes.remove(previousPreview[0]);
                 layerContainer.getChildren().remove(previousThisLineName[0]);
                 layerTextList.remove(previousThisLineName[0]);
@@ -694,9 +694,8 @@ public class Gui extends Application {
         });
         pane.add(cancel, 4, 10);
 
-        Object[] elements = {newLineWindow, pane, startX, startY, endX, endY, startChangeInX, startChangeInY,
+        return new Object[]{newLineWindow, pane, startX, startY, endX, endY, startChangeInX, startChangeInY,
                 endChangeInX, endChangeInY, iterations, lineName, preview, save, cancel, previousPreview,
                 previousPreviewPane, previousThisLineName};
-        return elements;
     }
 }
