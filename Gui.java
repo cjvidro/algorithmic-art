@@ -3,12 +3,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -33,11 +35,12 @@ public class Gui extends Application {
     private VBox shapeAndLayers = new VBox();
     private ComboBox<String> newShape = new ComboBox<>();
     private VBox fileContainer = new VBox();
-    private VBox filesTitleandFiles = new VBox();
+    private VBox filesTitleAndFiles = new VBox();
 
     // DATA Variables
     private ArrayList<AlgorithmicShape> algorithmicShapes = new ArrayList<>();
-    private ArrayList<AlgorithmicShape> shapePreviewReferences = new ArrayList<>();
+    private ArrayList<Text> layerTextList = new ArrayList<>();
+    private ArrayList<Pane> layerPanes = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -50,7 +53,6 @@ public class Gui extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
-
         // Color palette
         Background DarkGreyBackground = new Background(new BackgroundFill(new Color(0.28, 0.28, 0.28,
                 1.0), CornerRadii.EMPTY, Insets.EMPTY));
@@ -59,7 +61,8 @@ public class Gui extends Application {
         mainWindow.setLeft(viewer);
         mainWindow.setTop(MenuBar);
         mainWindow.setRight(layersAndFiles);
-        layersAndFiles.getChildren().addAll(shapeAndLayers, filesTitleandFiles);
+        layersAndFiles.setBackground(DarkGreyBackground);
+        layersAndFiles.getChildren().addAll(shapeAndLayers, filesTitleAndFiles);
         shapeAndLayers.setSpacing(10);
         shapeAndLayers.setAlignment(Pos.TOP_CENTER);
 
@@ -100,16 +103,18 @@ public class Gui extends Application {
         layers.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
         layers.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
         layers.minHeightProperty().bind(mainWindow.heightProperty().subtract(MenuBar.heightProperty().add(300)));
+        layers.maxHeightProperty().bind(mainWindow.heightProperty().subtract(MenuBar.heightProperty().add(300)));
         layers.setContent(layerContainer);
         layerContainer.setBackground(DarkGreyBackground);
         layerContainer.minWidthProperty().bind(layers.minWidthProperty());
         layerContainer.maxWidthProperty().bind(layers.minWidthProperty());
         layerContainer.minHeightProperty().bind(layers.minHeightProperty().subtract(5));
+        layerContainer.maxHeightProperty().bind(layers.minHeightProperty().subtract(5));
 
         // Files
         Text fileTitle = new Text("Files");
         fileTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 20));
-        filesTitleandFiles.getChildren().addAll(fileTitle, files);
+        filesTitleAndFiles.getChildren().addAll(fileTitle, files);
         files.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         files.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         files.setStyle("-fx-font-size: 18px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-border-color: red;");
@@ -150,6 +155,280 @@ public class Gui extends Application {
     }
 
     private void createNewLineAlgorithm() {
+        Object[] stageAndPane = getLineStage();
+        Stage newLineWindow = (Stage) stageAndPane[0];
+        GridPane pane = (GridPane) stageAndPane[1];
+
+        Scene mainWindow = new Scene(pane, 600, 400);
+        newLineWindow.setScene(mainWindow);
+        newLineWindow.setTitle("Algorithmic Art - Add New Line");
+        newLineWindow.initModality(Modality.APPLICATION_MODAL);
+        newLineWindow.show();
+    }
+
+    private void updateLineAlgorithm(String lineName) {
+        // Object[] lineStageElements = {newLineWindow, pane,  startX, startY, endX, endY, startChangeInX,
+        //                                 0              1       2       3      4     5         6
+        //
+        // startChangeInY, endChangeInX, endChangeInY, iterations, lineName, preview, save, cancel
+        //       7              8             9            10         11        12     13     14
+        //
+        // previousPreview, previousPreviewPane, previousThisLineName};
+        //       15                  16                17
+
+
+        Object[] lineStageElements = getLineStage();
+        Stage updateLineWindow = (Stage) lineStageElements[0];
+        GridPane pane = (GridPane) lineStageElements[1];
+        TextField startX = (TextField) lineStageElements[2];
+        TextField startY = (TextField) lineStageElements[3];
+        TextField endX = (TextField) lineStageElements[4];
+        TextField endY = (TextField) lineStageElements[5];
+        TextField startChangeInX = (TextField) lineStageElements[6];
+        TextField startChangeInY = (TextField) lineStageElements[7];
+        TextField endChangeInX = (TextField) lineStageElements[8];
+        TextField endChangeInY = (TextField) lineStageElements[9];
+        TextField iterations = (TextField) lineStageElements[10];
+        TextField thisLineName = (TextField) lineStageElements[11];
+        Button preview = (Button) lineStageElements[12];
+        Button save = (Button) lineStageElements[13];
+        Button cancel = (Button) lineStageElements[14];
+        //AlgorithmicLine[] previousPreview = (AlgorithmicLine[]) lineStageElements[15];
+        Pane[] previousPreviewPane = (Pane[]) lineStageElements[16];
+        //Text[] previousThisLineName = (Text[]) lineStageElements[17];
+
+        // old data
+        AlgorithmicLine[] outdatedLine = {null};
+        Text[] outdatedText = {null};
+
+
+        for (AlgorithmicShape shape : algorithmicShapes) {
+            if (shape.getName().equals(lineName)) {
+                outdatedLine[0] = (AlgorithmicLine) shape;
+                break;
+            }
+        }
+
+        if (outdatedLine[0] == null) {
+            throw new RuntimeException("No Previous AlgorithmicLine Found!");
+        }
+
+        for (Text text : layerTextList) {
+            if (text.getText().equals(lineName)) {
+                outdatedText[0] = text;
+                break;
+            }
+        }
+
+        if (outdatedText[0] == null) {
+            throw new RuntimeException("No Previous layer name Found!");
+        }
+
+        // Set prompt Text in window
+        startX.setPromptText(outdatedLine[0].getStartX() + "");
+        startY.setPromptText(outdatedLine[0].getStartY() + "");
+        endX.setPromptText(outdatedLine[0].getEndX() + "");
+        endY.setPromptText(outdatedLine[0].getEndY() + "");
+        startChangeInX.setPromptText(outdatedLine[0].getStartDx() + "");
+        startChangeInY.setPromptText(outdatedLine[0].getStartDy() + "");
+        endChangeInX.setPromptText(outdatedLine[0].getEndDx() + "");
+        endChangeInY.setPromptText(outdatedLine[0].getEndDy() + "");
+        iterations.setPromptText(outdatedLine[0].getIterations() + "");
+        thisLineName.setPromptText(outdatedLine[0].getName() + "");
+
+        // set actual text in window
+        startX.setText(outdatedLine[0].getStartX() + "");
+        startY.setText(outdatedLine[0].getStartY() + "");
+        endX.setText(outdatedLine[0].getEndX() + "");
+        endY.setText(outdatedLine[0].getEndY() + "");
+        startChangeInX.setText(outdatedLine[0].getStartDx() + "");
+        startChangeInY.setText(outdatedLine[0].getStartDy() + "");
+        endChangeInX.setText(outdatedLine[0].getEndDx() + "");
+        endChangeInY.setText(outdatedLine[0].getEndDy() + "");
+        iterations.setText(outdatedLine[0].getIterations() + "");
+        thisLineName.setText(outdatedLine[0].getName() + "");
+
+        // new data
+        AlgorithmicLine adjustedLine = new AlgorithmicLine(
+                outdatedLine[0].getStartX(),
+                -outdatedLine[0].getStartY(),
+                outdatedLine[0].getEndX(),
+                -outdatedLine[0].getEndY(),
+                outdatedLine[0].getStartDx(),
+                -outdatedLine[0].getStartDy(),
+                outdatedLine[0].getEndDx(),
+                -outdatedLine[0].getEndDy(),
+                outdatedLine[0].getIterations(),
+                outdatedLine[0].getName());
+
+        Text adjustedText = new Text(outdatedText[0].getText());
+        adjustedText.setFill(Color.WHITE);
+        adjustedText.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        adjustedText.setOnMouseClicked(event1 -> {
+            if (event1.getButton().equals(MouseButton.PRIMARY) && event1.getClickCount() == 2) {
+                updateLineAlgorithm(adjustedLine.getName());
+            }
+        });
+        Pane[] adjustedPane = {adjustedLine.draw(viewer, layerPanes)};
+
+        // add new data to be displayed and stored in data lists
+        algorithmicShapes.add(adjustedLine);
+        layerContainer.getChildren().add(adjustedText);
+        layerTextList.add(adjustedText);
+
+        // remove old data
+        algorithmicShapes.remove(outdatedLine[0]);
+        layerContainer.getChildren().remove(outdatedText[0]);
+        layerTextList.remove(outdatedText[0]);
+        viewer.getChildren().remove(previousPreviewPane[0]);
+
+        int oldIndex = viewer.getChildren().indexOf(outdatedLine);
+
+//        Object[] viewerTest = viewer.getChildren().toArray();
+//        System.out.println("\nBefore: ");
+//        for (Object o : viewerTest) {
+//            System.out.print(o + " ");
+//        }
+
+//        System.out.println("\n\nAttempting to remove " + lineStageElements[16].toString());
+        viewer.getChildren().remove(oldIndex + 1);
+
+//        viewerTest = viewer.getChildren().toArray();
+//        System.out.println("\nAfter: ");
+//        for (Object o : viewerTest) {
+//            System.out.print((o) + " ");
+//        }
+
+        // update buttons
+        preview.setOnAction(event -> {
+            if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
+                    startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), thisLineName.getText())) {
+
+                adjustedLine.setStartX(Integer.parseInt(startX.getText()));
+                adjustedLine.setStartY(Integer.parseInt(startY.getText()));
+                adjustedLine.setEndX(Integer.parseInt(endX.getText()));
+                adjustedLine.setEndY(Integer.parseInt(endY.getText()));
+                adjustedLine.setStartDx(Integer.parseInt(startChangeInX.getText()));
+                adjustedLine.setStartDy(Integer.parseInt(startChangeInY.getText()));
+                adjustedLine.setEndDx(Integer.parseInt(endChangeInX.getText()));
+                adjustedLine.setEndDy(Integer.parseInt(endChangeInY.getText()));
+                adjustedLine.setIterations(Integer.parseInt(iterations.getText()));
+                adjustedLine.setName(thisLineName.getText());
+                adjustedText.setText(thisLineName.getText());
+
+                viewer.getChildren().remove(adjustedPane[0]);
+                adjustedPane[0] = adjustedLine.draw(viewer, layerPanes);
+            }
+        });
+
+        save.setOnAction(event -> {
+            if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
+                    startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), thisLineName.getText())) {
+
+                adjustedLine.setStartX(Integer.parseInt(startX.getText()));
+                adjustedLine.setStartY(Integer.parseInt(startY.getText()));
+                adjustedLine.setEndX(Integer.parseInt(endX.getText()));
+                adjustedLine.setEndY(Integer.parseInt(endY.getText()));
+                adjustedLine.setStartDx(Integer.parseInt(startChangeInX.getText()));
+                adjustedLine.setStartDy(Integer.parseInt(startChangeInY.getText()));
+                adjustedLine.setEndDx(Integer.parseInt(endChangeInX.getText()));
+                adjustedLine.setEndDy(Integer.parseInt(endChangeInY.getText()));
+                adjustedLine.setIterations(Integer.parseInt(iterations.getText()));
+                adjustedLine.setName(thisLineName.getText());
+                adjustedText.setText(thisLineName.getText());
+
+                viewer.getChildren().remove(adjustedPane[0]);
+                adjustedPane[0] = adjustedLine.draw(viewer, layerPanes);
+
+                Object[] viewerTest = viewer.getChildren().toArray();
+                System.out.println("\npost-save: ");
+                for (Object o : viewerTest) {
+                    System.out.print(o + " ");
+                }
+
+                updateLineWindow.close();
+            }
+        });
+
+        cancel.setOnAction(event -> {
+            // remove any changes
+            viewer.getChildren().remove(adjustedPane[0]);
+            algorithmicShapes.remove(adjustedLine);
+            layerContainer.getChildren().remove(adjustedText);
+            layerTextList.remove(adjustedText);
+
+            // restore original function
+            algorithmicShapes.add(outdatedLine[0]);
+            layerContainer.getChildren().add(outdatedText[0]);
+            layerTextList.add(outdatedText[0]);
+            outdatedLine[0].draw(viewer, layerPanes);
+
+            updateLineWindow.close();
+        });
+
+        // move buttons, add remove button
+        pane.getChildren().remove(save);
+        pane.add(save, 1, 10);
+
+        Button remove = new Button("Remove");
+        remove.setOnAction(event -> {
+            // remove any changes
+            viewer.getChildren().remove(adjustedPane[0]);
+            algorithmicShapes.remove(adjustedLine);
+            layerContainer.getChildren().remove(adjustedText);
+            layerTextList.remove(adjustedText);
+
+            updateLineWindow.close();
+        });
+        pane.add(remove, 3, 10);
+
+        Scene mainWindow = new Scene(pane, 600, 400);
+        updateLineWindow.setScene(mainWindow);
+        updateLineWindow.setTitle("Algorithmic Art - Update Line");
+        updateLineWindow.initModality(Modality.APPLICATION_MODAL);
+        updateLineWindow.show();
+    }
+
+    private Boolean isValidLine(String startX, String startY, String endX, String endY, String startChangeInX,
+                                String startChangeInY, String endChangeInX, String endChangeInY, String iterations,
+                                String lineName) {
+
+        if (startX != null && isNumeric(startX)
+                && startY != null && isNumeric(startY)
+                && endX != null && isNumeric(endX)
+                && endY != null && isNumeric(endY)
+                && startChangeInX != null && isNumeric(startChangeInX)
+                && startChangeInY != null && isNumeric(startChangeInY)
+                && endChangeInX != null && isNumeric(endChangeInX)
+                && endChangeInY != null && isNumeric(endChangeInY)
+                && iterations != null && isNumeric(iterations) && Integer.parseInt(iterations) > 0
+                && lineName != null && !lineName.equals("")) {
+            return true;
+        }
+
+        System.out.println("This line does not have valid parameters!");
+        return false;
+    }
+
+    private Region getNewShapeSpacer() {
+        Region spacer = new Region();
+        spacer.setMinWidth(25);
+        spacer.setMaxWidth(25);
+        spacer.setMaxHeight(15);
+        spacer.setMinHeight(15);
+        return spacer;
+    }
+
+    private boolean isNumeric(String str) {
+        try {
+            Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private Object[] getLineStage() {
         Stage newLineWindow = new Stage();
 
         GridPane pane = new GridPane();
@@ -261,6 +540,11 @@ public class Gui extends Application {
             if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
                     startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), lineName.getText())) {
 
+                if (previousPreviewPane[0] != null) {
+//                    System.out.println("\nAttempting to remove " + previousPreviewPane[0].toString());
+                    viewer.getChildren().remove(previousPreviewPane[0]);
+                }
+
                 AlgorithmicLine line = new AlgorithmicLine(
                         Integer.parseInt(startX.getText()),
                         Integer.parseInt(startY.getText()),
@@ -277,30 +561,34 @@ public class Gui extends Application {
                     // brand new preview
                     previousPreview[0] = line;
                     algorithmicShapes.add(line);
-                    shapePreviewReferences.add(line);
 
                     previousThisLineName[0] = new Text(line.getName());
                     previousThisLineName[0].setFill(Color.WHITE);
                     previousThisLineName[0].setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                    previousThisLineName[0].setOnMouseClicked(event1 -> {
+                        if (event1.getButton().equals(MouseButton.PRIMARY) && event1.getClickCount() == 2) {
+                            updateLineAlgorithm(line.getName());
+                        }
+                    });
                     layerContainer.getChildren().add(previousThisLineName[0]);
+                    layerTextList.add(previousThisLineName[0]);
 
-                    previousPreviewPane[0] = line.draw(viewer);
+                    previousPreviewPane[0] = line.draw(viewer, layerPanes);
                     System.out.println("Line " + line.getName() + " previewed!");
                 } else {
                     // remove old references
                     viewer.getChildren().remove(previousPreviewPane[0]);
-                    shapePreviewReferences.remove(previousPreview[0]);
+                    layerPanes.remove(previousPreviewPane[0]);
                     algorithmicShapes.remove(previousPreview[0]);
 
                     // add new references
                     previousPreview[0] = line;
                     algorithmicShapes.add(line);
-                    shapePreviewReferences.add(line);
 
                     // update text name
                     previousThisLineName[0].setText(line.getName());
 
-                    previousPreviewPane[0] = line.draw(viewer);
+                    previousPreviewPane[0] = line.draw(viewer, layerPanes);
                     System.out.println("Line " + line.getName() + " previewed!");
                 }
             }
@@ -318,6 +606,12 @@ public class Gui extends Application {
 
             if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
                     startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), lineName.getText())) {
+
+                if (previousPreviewPane[0] != null) {
+//                    System.out.println("\nAttempting to remove " + previousPreviewPane[0].toString());
+                    viewer.getChildren().remove(previousPreviewPane[0]);
+                    layerPanes.remove(previousPreviewPane[0]);
+                }
 
                 AlgorithmicLine line = new AlgorithmicLine(
                         Integer.parseInt(startX.getText()),
@@ -367,7 +661,13 @@ public class Gui extends Application {
                     Text thisLineName = new Text(line.getName());
                     thisLineName.setFill(Color.WHITE);
                     thisLineName.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                    thisLineName.setOnMouseClicked(event1 -> {
+                        if (event1.getButton().equals(MouseButton.PRIMARY) && event1.getClickCount() == 2) {
+                            updateLineAlgorithm(line.getName());
+                        }
+                    });
                     layerContainer.getChildren().add(thisLineName);
+                    layerTextList.add(thisLineName);
                 }
                 // preview has the exact same contents as the to-save line
                 else if (line.getStartX() == previousPreview[0].getStartX() && line.getStartY() == previousPreview[0].getStartY()
@@ -375,12 +675,13 @@ public class Gui extends Application {
                         && line.getStartDx() == previousPreview[0].getStartDx() && line.getStartDy() == previousPreview[0].getStartDy()
                         && line.getEndDx() == previousPreview[0].getEndDx() && line.getEndDy() == previousPreview[0].getEndDy()
                         && line.getIterations() == previousPreview[0].getIterations() && line.getName().equals(previousPreview[0].getName())) {
-                    // do nothing exit
+                    // do nothing
                 }
                 // preview is different then the to-save line
                 else {
                     // remove old references
                     viewer.getChildren().remove(previousPreviewPane[0]);
+                    layerPanes.remove(previousPreviewPane[0]);
                     algorithmicShapes.remove(previousPreview[0]);
 
                     // add new references
@@ -390,14 +691,20 @@ public class Gui extends Application {
                     previousThisLineName[0].setText(line.getName());
                 }
 
-                line.draw(viewer);
+                previousPreviewPane[0] = line.draw(viewer, layerPanes);
                 System.out.println("Line " + line.getName() + " saved!");
 
-                // reset references, close window
-                shapePreviewReferences.remove(previousPreview[0]);
-                previousPreview[0] = null;
-                previousPreviewPane[0] = null;
-                previousThisLineName[0] = null;
+//                // reset references, close window
+//                previousPreview[0] = null;
+//                previousPreviewPane[0] = null;
+//                previousThisLineName[0] = null;
+
+                Object[] viewerTest = viewer.getChildren().toArray();
+                System.out.println("\npost-save: ");
+                for (Object o : viewerTest) {
+                    System.out.print(o + " ");
+                }
+
                 newLineWindow.close();
             }
         });
@@ -407,12 +714,12 @@ public class Gui extends Application {
         cancel.setOnAction(event -> {
             if (previousPreview[0] != null) {
                 viewer.getChildren().remove(previousPreviewPane[0]);
-                shapePreviewReferences.remove(previousPreview[0]);
+                layerPanes.remove(previousPreviewPane[0]);
                 algorithmicShapes.remove(previousPreview[0]);
                 layerContainer.getChildren().remove(previousThisLineName[0]);
+                layerTextList.remove(previousThisLineName[0]);
                 previousPreview[0] = null;
                 previousPreviewPane[0] = null;
-                previousThisLineName[0] = null;
                 previousThisLineName[0] = null;
             }
 
@@ -420,48 +727,8 @@ public class Gui extends Application {
         });
         pane.add(cancel, 4, 10);
 
-        Scene mainWindow = new Scene(pane, 600, 400);
-        newLineWindow.setScene(mainWindow);
-        newLineWindow.setTitle("Algorithmic Art - Add New Line");
-        newLineWindow.show();
-    }
-
-    private Boolean isValidLine(String startX, String startY, String endX, String endY, String startChangeInX,
-                                String startChangeInY, String endChangeInX, String endChangeInY, String iterations,
-                                String lineName) {
-
-        if (startX != null && isNumeric(startX)
-                && startY != null && isNumeric(startY)
-                && endX != null && isNumeric(endX)
-                && endY != null && isNumeric(endY)
-                && startChangeInX != null && isNumeric(startChangeInX)
-                && startChangeInY != null && isNumeric(startChangeInY)
-                && endChangeInX != null && isNumeric(endChangeInX)
-                && endChangeInY != null && isNumeric(endChangeInY)
-                && iterations != null && isNumeric(iterations)
-                && lineName != null) {
-            return true;
-        }
-
-        System.out.println("This line does not have valid parameters!");
-        return false;
-    }
-
-    private Region getNewShapeSpacer() {
-        Region spacer = new Region();
-        spacer.setMinWidth(25);
-        spacer.setMaxWidth(25);
-        spacer.setMaxHeight(15);
-        spacer.setMinHeight(15);
-        return spacer;
-    }
-
-    private boolean isNumeric(String str) {
-        try {
-            Integer.parseInt(str);
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        return true;
+        return new Object[]{newLineWindow, pane, startX, startY, endX, endY, startChangeInX, startChangeInY,
+                endChangeInX, endChangeInY, iterations, lineName, preview, save, cancel, previousPreview,
+                previousPreviewPane, previousThisLineName};
     }
 }
