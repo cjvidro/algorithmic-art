@@ -103,11 +103,13 @@ public class Gui extends Application {
         layers.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
         layers.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
         layers.minHeightProperty().bind(mainWindow.heightProperty().subtract(MenuBar.heightProperty().add(300)));
+        layers.maxHeightProperty().bind(mainWindow.heightProperty().subtract(MenuBar.heightProperty().add(300)));
         layers.setContent(layerContainer);
         layerContainer.setBackground(DarkGreyBackground);
         layerContainer.minWidthProperty().bind(layers.minWidthProperty());
         layerContainer.maxWidthProperty().bind(layers.minWidthProperty());
         layerContainer.minHeightProperty().bind(layers.minHeightProperty().subtract(5));
+        layerContainer.maxHeightProperty().bind(layers.minHeightProperty().subtract(5));
 
         // Files
         Text fileTitle = new Text("Files");
@@ -234,6 +236,18 @@ public class Gui extends Application {
         iterations.setPromptText(outdatedLine[0].getIterations() + "");
         thisLineName.setPromptText(outdatedLine[0].getName() + "");
 
+        // set actual text in window
+        startX.setText(outdatedLine[0].getStartX() + "");
+        startY.setText(outdatedLine[0].getStartY() + "");
+        endX.setText(outdatedLine[0].getEndX() + "");
+        endY.setText(outdatedLine[0].getEndY() + "");
+        startChangeInX.setText(outdatedLine[0].getStartDx() + "");
+        startChangeInY.setText(outdatedLine[0].getStartDy() + "");
+        endChangeInX.setText(outdatedLine[0].getEndDx() + "");
+        endChangeInY.setText(outdatedLine[0].getEndDy() + "");
+        iterations.setText(outdatedLine[0].getIterations() + "");
+        thisLineName.setText(outdatedLine[0].getName() + "");
+
         // new data
         AlgorithmicLine adjustedLine = new AlgorithmicLine(
                 outdatedLine[0].getStartX(),
@@ -268,24 +282,22 @@ public class Gui extends Application {
         layerTextList.remove(outdatedText[0]);
         viewer.getChildren().remove(previousPreviewPane[0]);
 
-        //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
         int oldIndex = viewer.getChildren().indexOf(outdatedLine);
 
-        Object[] viewerTest = viewer.getChildren().toArray();
-        System.out.println("\nBefore: ");
-        for (Object o : viewerTest) {
-            System.out.print(o + " ");
-        }
+//        Object[] viewerTest = viewer.getChildren().toArray();
+//        System.out.println("\nBefore: ");
+//        for (Object o : viewerTest) {
+//            System.out.print(o + " ");
+//        }
 
-        System.out.println("\n\nAttempting to remove " + lineStageElements[16].toString());
+//        System.out.println("\n\nAttempting to remove " + lineStageElements[16].toString());
         viewer.getChildren().remove(oldIndex + 1);
 
-        viewerTest = viewer.getChildren().toArray();
-        System.out.println("\nAfter: ");
-        for (Object o : viewerTest) {
-            System.out.print((o) + " ");
-        }
-        //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+//        viewerTest = viewer.getChildren().toArray();
+//        System.out.println("\nAfter: ");
+//        for (Object o : viewerTest) {
+//            System.out.print((o) + " ");
+//        }
 
         // update buttons
         preview.setOnAction(event -> {
@@ -328,6 +340,11 @@ public class Gui extends Application {
                 viewer.getChildren().remove(adjustedPane[0]);
                 adjustedPane[0] = adjustedLine.draw(viewer, layerPanes);
 
+                Object[] viewerTest = viewer.getChildren().toArray();
+                System.out.println("\npost-save: ");
+                for (Object o : viewerTest) {
+                    System.out.print(o + " ");
+                }
 
                 updateLineWindow.close();
             }
@@ -349,6 +366,22 @@ public class Gui extends Application {
             updateLineWindow.close();
         });
 
+        // move buttons, add remove button
+        pane.getChildren().remove(save);
+        pane.add(save, 1, 10);
+
+        Button remove = new Button("Remove");
+        remove.setOnAction(event -> {
+            // remove any changes
+            viewer.getChildren().remove(adjustedPane[0]);
+            algorithmicShapes.remove(adjustedLine);
+            layerContainer.getChildren().remove(adjustedText);
+            layerTextList.remove(adjustedText);
+
+            updateLineWindow.close();
+        });
+        pane.add(remove, 3, 10);
+
         Scene mainWindow = new Scene(pane, 600, 400);
         updateLineWindow.setScene(mainWindow);
         updateLineWindow.setTitle("Algorithmic Art - Update Line");
@@ -368,8 +401,8 @@ public class Gui extends Application {
                 && startChangeInY != null && isNumeric(startChangeInY)
                 && endChangeInX != null && isNumeric(endChangeInX)
                 && endChangeInY != null && isNumeric(endChangeInY)
-                && iterations != null && isNumeric(iterations)
-                && lineName != null) {
+                && iterations != null && isNumeric(iterations) && Integer.parseInt(iterations) > 0
+                && lineName != null && !lineName.equals("")) {
             return true;
         }
 
@@ -508,7 +541,7 @@ public class Gui extends Application {
                     startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), lineName.getText())) {
 
                 if (previousPreviewPane[0] != null) {
-                    System.out.println("\nAttempting to remove " + previousPreviewPane[0].toString());
+//                    System.out.println("\nAttempting to remove " + previousPreviewPane[0].toString());
                     viewer.getChildren().remove(previousPreviewPane[0]);
                 }
 
@@ -575,7 +608,7 @@ public class Gui extends Application {
                     startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), lineName.getText())) {
 
                 if (previousPreviewPane[0] != null) {
-                    System.out.println("\nAttempting to remove " + previousPreviewPane[0].toString());
+//                    System.out.println("\nAttempting to remove " + previousPreviewPane[0].toString());
                     viewer.getChildren().remove(previousPreviewPane[0]);
                     layerPanes.remove(previousPreviewPane[0]);
                 }

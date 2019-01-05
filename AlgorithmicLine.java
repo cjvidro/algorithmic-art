@@ -119,7 +119,7 @@ public class AlgorithmicLine extends AlgorithmicShape {
         } else {
             viewer.getChildren().addAll(layerPane);
             paneList.add(layerPane);
-            System.out.println("\nAdded: " + layerPane.toString());
+            //System.out.println("\nAdded: " + layerPane.toString());
             return layerPane;
         }
     }
