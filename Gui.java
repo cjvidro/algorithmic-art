@@ -3,6 +3,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -24,23 +25,31 @@ public class Gui extends Application {
     // GUI Variables
     private BorderPane mainWindow = new BorderPane();
     private StackPane viewer = new StackPane();
-    private HBox MenuBar = new HBox();
-    private Scene primaryScene;
-    private Stage primaryStage;
-    private Text ArtTitle = new Text("unnamed");
+    private HBox menuBar = new HBox();
+    private Text artTitle = new Text("unnamed");
     private ScrollPane layers = new ScrollPane();
-    private HBox layersAndFiles = new HBox();
+    private HBox editAndFileHBox = new HBox();
     private VBox layerContainer = new VBox();
     private ScrollPane files = new ScrollPane();
-    private VBox shapeAndLayers = new VBox();
+    private VBox editVBox = new VBox();
     private ComboBox<String> newShape = new ComboBox<>();
     private VBox fileContainer = new VBox();
-    private VBox filesTitleAndFiles = new VBox();
+    private VBox fileVBox = new VBox();
 
     // DATA Variables
     private ArrayList<AlgorithmicShape> algorithmicShapes = new ArrayList<>();
     private ArrayList<Text> layerTextList = new ArrayList<>();
     private ArrayList<Pane> layerPanes = new ArrayList<>();
+
+    // Color palette
+    private final Color darkGrey = Color.hsb(0,0,0.16);
+    private final Background darkGreyBackground = new Background(new BackgroundFill(darkGrey, CornerRadii.EMPTY, Insets.EMPTY));
+    private final Color midGrey = Color.hsb(0,0,0.25);
+    private final Background midGreyBackground = new Background(new BackgroundFill(midGrey, CornerRadii.EMPTY, Insets.EMPTY));
+    private final Color lightGrey = Color.hsb(0,0,0.39);
+    private final Background lightGreyBackground = new Background(new BackgroundFill(lightGrey, CornerRadii.EMPTY, Insets.EMPTY));
+    private final Background buttonBackground = new Background(new BackgroundFill(Color.hsb(  240,0.01,0.68), CornerRadii.EMPTY, Insets.EMPTY));
+    private final Background buttonSelectedBackground = new Background(new BackgroundFill(Color.hsb(  180,0.09,0.86), CornerRadii.EMPTY, Insets.EMPTY));
 
     public static void main(String[] args) {
         launch(args);
@@ -53,105 +62,221 @@ public class Gui extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
-        // Color palette
-        Background DarkGreyBackground = new Background(new BackgroundFill(new Color(0.28, 0.28, 0.28,
-                1.0), CornerRadii.EMPTY, Insets.EMPTY));
 
         // setting window spaces
-        mainWindow.setLeft(viewer);
-        mainWindow.setTop(MenuBar);
-        mainWindow.setRight(layersAndFiles);
-        layersAndFiles.setBackground(DarkGreyBackground);
-        layersAndFiles.getChildren().addAll(shapeAndLayers, filesTitleAndFiles);
-        shapeAndLayers.setSpacing(10);
-        shapeAndLayers.setAlignment(Pos.TOP_CENTER);
+        mainWindow.setCenter(viewer);
+        mainWindow.setTop(menuBar);
+        mainWindow.setRight(editAndFileHBox);
+        editAndFileHBox.setBackground(midGreyBackground);
+        editAndFileHBox.getChildren().addAll(editVBox, fileVBox);
+        editVBox.setSpacing(20);
+        editVBox.setAlignment(Pos.TOP_CENTER);
 
         // viewer
         viewer.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
         viewer.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
-        viewer.setStyle("-fx-border-color: green;");
+        viewer.setStyle("-fx-border-color: black; -fx-border-width: 1");
 
         // Menu bar edits
-        MenuBar.setAlignment(Pos.CENTER);
-        MenuBar.setSpacing(15);
-        MenuBar.setBackground(DarkGreyBackground);
-        ArtTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 20));
-        ArtTitle.setFill(Color.WHITE);
-        MenuBar.getChildren().add(ArtTitle);
-        MenuBar.setMaxHeight(40);
-        MenuBar.setPadding(new Insets(10, 10, 10, 10));
+        menuBar.setAlignment(Pos.CENTER_LEFT);
+        menuBar.setBackground(midGreyBackground);
+        menuBar.setSpacing(20);
+
+        StackPane artTitlePane = new StackPane();
+        artTitlePane.setPadding(new Insets(3, 3, 3, 3));
+        artTitlePane.setBackground(lightGreyBackground);
+        artTitlePane.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
+        artTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
+        artTitle.setFill(Color.WHITE);
+        artTitlePane.getChildren().add(artTitle);
+
+        StackPane editPane = new StackPane();
+        editPane.setPadding(new Insets(3, 3, 3, 3));
+        editPane.setBackground(darkGreyBackground);
+        editPane.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15).subtract(20));
+        Text editText = new Text("Edit");
+        editText.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
+        editText.setFill(Color.WHITE);
+        editPane.getChildren().add(editText);
+
+        StackPane filePane = new StackPane();
+        filePane.setPadding(new Insets(3, 3, 3, 3));
+        filePane.setBackground(darkGreyBackground);
+        filePane.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15).subtract(20));
+        Text fileText = new Text("File");
+        fileText.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
+        fileText.setFill(Color.WHITE);
+        filePane.getChildren().add(fileText);
+
+        menuBar.getChildren().addAll(artTitlePane, editPane, filePane);
+
+        // Edit Controls
+        // guides
+//        Label guidesLabel = new Label("Guides");
+//        guidesLabel.setTextFill(Color.WHITE);
+//        guidesLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
+//        guidesLabel.setOnMouseClicked(event -> addGuides());
+
+        HBox guides = new HBox();
+        guides.setAlignment(Pos.CENTER);
+        guides.setSpacing(2);
+        guides.minWidthProperty().bind(layerContainer.widthProperty());
+
+        Button center = new Button("Center");
+        center.setBackground(buttonBackground);
+        center.setOnMouseEntered(event -> center.setBackground(buttonSelectedBackground));
+        center.setOnMouseExited(event -> center.setBackground(buttonBackground));
+        center.setOnAction(event -> {
+            System.out.println("center selected");
+        });
+
+        Button grid = new Button("Grid");
+        grid.setBackground(buttonBackground);
+        grid.setOnMouseEntered(event -> grid.setBackground(buttonSelectedBackground));
+        grid.setOnMouseExited(event -> grid.setBackground(buttonBackground));
+        grid.setOnAction(event -> {
+            System.out.println("grid selected");
+        });
+
+        guides.getChildren().addAll(center, grid);
+
+        // rotate
+        TextField rotate = new TextField("0.0");
+        rotate.setPromptText("0.0");
+        rotate.setMaxWidth(75);
+        rotate.setBackground(buttonSelectedBackground);
+        rotate.setOnAction(event -> {
+            if (isNumeric(rotate.getText())) {
+                viewer.setRotate(Double.parseDouble(rotate.getText()));
+            }
+        });
+
+        // zoom (scale)
+        TextField zoom = new TextField("0.0");
+        zoom.setPromptText("0.0");
+        zoom.setMaxWidth(75);
+        zoom.setBackground(buttonSelectedBackground);
+        zoom.setOnAction(event -> {
+            if (isNumeric(zoom.getText())) {
+                Double zoomNumber = Double.parseDouble(zoom.getText()) / 10;
+                viewer.setScaleX(zoomNumber);
+                viewer.setScaleY(zoomNumber);
+            }
+        });
+
+        // Background Color (slider)
+        // Grid lines
+        // Center Crosshair
+        editVBox.getChildren().addAll(guides, rotate, zoom);
 
         // new shape
         newShape.getItems().addAll("Line");
         newShape.setPromptText("Add Shape");
 
-        newShape.setOnAction(event -> {
-            System.out.println("Selected " + newShape.getValue());
-            if (newShape.getValue().equals("Line")) {
-                createNewLineAlgorithm();
+        newShape.setOnAction(event -> comboBoxSelected());
+
+        newShape.setBackground(buttonBackground);
+        newShape.setOnMouseEntered(event -> newShape.setBackground(buttonSelectedBackground));
+        newShape.setOnMouseExited(event -> {
+            if (!newShape.isShowing()) {
+                newShape.setBackground(buttonBackground);
             }
-            createNewShapeComboBox();
         });
+        newShape.setOnShowing(event -> newShape.setBackground(buttonSelectedBackground));
+        newShape.setOnHiding(event -> newShape.setBackground(buttonBackground));
 
         // layers
         Text layerTitle = new Text("Layers");
-        layerTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 20));
-        shapeAndLayers.getChildren().addAll(newShape, layerTitle, layers);
+        layerTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
+
+        layerTitle.setFill(Color.WHITE);
+        layerContainer.setBackground(darkGreyBackground);
+        layers.setBackground(darkGreyBackground);
+
+        layerContainer.setSpacing(10);
+        editVBox.setSpacing(10);
+        editVBox.setPadding(new Insets(10, 20, 10, 20));
+        editVBox.getChildren().addAll(newShape, layerTitle, layers);
+
         layers.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        layers.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        layers.setStyle("-fx-font-size: 18px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-border-color: red;");
-        layers.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
-        layers.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
-        layers.minHeightProperty().bind(mainWindow.heightProperty().subtract(MenuBar.heightProperty().add(300)));
-        layers.maxHeightProperty().bind(mainWindow.heightProperty().subtract(MenuBar.heightProperty().add(300)));
+        layers.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        layers.setStyle("-fx-font-size: 15px");
+        layers.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15).subtract(20));
+        layers.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.15).subtract(20));
+        layers.minHeightProperty().bind(mainWindow.heightProperty().subtract(menuBar.heightProperty().add(300)));
+        layers.maxHeightProperty().bind(mainWindow.heightProperty().subtract(menuBar.heightProperty().add(300)));
         layers.setContent(layerContainer);
-        layerContainer.setBackground(DarkGreyBackground);
         layerContainer.minWidthProperty().bind(layers.minWidthProperty());
-        layerContainer.maxWidthProperty().bind(layers.minWidthProperty());
-        layerContainer.minHeightProperty().bind(layers.minHeightProperty().subtract(5));
-        layerContainer.maxHeightProperty().bind(layers.minHeightProperty().subtract(5));
+        layerContainer.maxWidthProperty().bind(layers.maxWidthProperty());
+        layerContainer.minHeightProperty().bind(layers.minHeightProperty());
 
         // Files
-        Text fileTitle = new Text("Files");
-        fileTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 20));
-        filesTitleAndFiles.getChildren().addAll(fileTitle, files);
+        fileContainer.setBackground(darkGreyBackground);
+        files.setBackground(darkGreyBackground);
+
+        fileContainer.setSpacing(10);
+        fileVBox.setSpacing(10);
+        fileVBox.getChildren().addAll(files);
+        fileVBox.setPadding(new Insets(10, 0, 0, 0));
+
         files.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        files.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        files.setStyle("-fx-font-size: 18px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-border-color: red;");
+        files.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        files.setStyle("-fx-font-size: 15px");
         files.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
         files.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.15));
+        files.minHeightProperty().bind(mainWindow.heightProperty().subtract(menuBar.heightProperty()));
+        files.maxHeightProperty().bind(mainWindow.heightProperty().subtract(menuBar.heightProperty()));
         files.setContent(fileContainer);
-
+        fileContainer.minWidthProperty().bind(files.minWidthProperty());
+        fileContainer.maxWidthProperty().bind(files.maxWidthProperty());
+        fileContainer.minHeightProperty().bind(files.minHeightProperty());
 
         // stage & scene edits
-        this.primaryStage = primaryStage;
-        primaryScene = new Scene(mainWindow, 1280, 720);
-        primaryScene.setFill(Color.GRAY);
+        Scene primaryScene = new Scene(mainWindow, 1280, 720);
+        primaryScene.setFill(midGrey);
 
-        this.primaryStage.setScene(primaryScene);
-        this.primaryStage.setTitle("Algorithmic Art");
 
-        this.primaryStage.setMinWidth(700);
-        this.primaryStage.show();
+        primaryStage.setScene(primaryScene);
+        primaryStage.setTitle("Algorithmic Art");
+        primaryStage.getIcons().add(new Image("/icon.png"));
+
+        primaryStage.setMinWidth(825);
+        primaryStage.setMinHeight(500);
+        primaryStage.show();
+    }
+
+    private void comboBoxSelected() {
+        System.out.println("Selected " + newShape.getValue());
+        if (newShape.getValue().equals("Line")) {
+            createNewLineAlgorithm();
+        }
+
+        createNewShapeComboBox();
     }
 
     private void createNewShapeComboBox() {
-        shapeAndLayers.getChildren().remove(newShape);
+        int indexBox = editVBox.getChildren().indexOf(newShape);
+        editVBox.getChildren().remove(newShape);
 
         newShape = new ComboBox<>();
+
+        newShape.setBackground(buttonBackground);
+        newShape.setOnMouseEntered(event -> newShape.setBackground(buttonSelectedBackground));
+        newShape.setOnMouseExited(event -> {
+            if (!newShape.isShowing()) {
+                newShape.setBackground(buttonBackground);
+            }
+        });
+        newShape.setOnShowing(event -> newShape.setBackground(buttonSelectedBackground));
+        newShape.setOnHiding(event -> newShape.setBackground(buttonBackground));
+
 
         newShape.getItems().addAll("Line");
         newShape.setPromptText("Add Shape");
 
-        newShape.setOnAction(event -> {
-            System.out.println("Selected " + newShape.getValue());
-            if (newShape.getValue().equals("Line")) {
-                createNewLineAlgorithm();
-            }
-            createNewShapeComboBox();
-        });
+        newShape.setOnAction(event -> comboBoxSelected());
 
-        shapeAndLayers.getChildren().add(0, newShape);
+        editVBox.getChildren().add(indexBox, newShape);
     }
 
     private void createNewLineAlgorithm() {
@@ -263,7 +388,7 @@ public class Gui extends Application {
 
         Text adjustedText = new Text(outdatedText[0].getText());
         adjustedText.setFill(Color.WHITE);
-        adjustedText.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        adjustedText.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
         adjustedText.setOnMouseClicked(event1 -> {
             if (event1.getButton().equals(MouseButton.PRIMARY) && event1.getClickCount() == 2) {
                 updateLineAlgorithm(adjustedLine.getName());
@@ -341,7 +466,7 @@ public class Gui extends Application {
                 adjustedPane[0] = adjustedLine.draw(viewer, layerPanes);
 
                 Object[] viewerTest = viewer.getChildren().toArray();
-                System.out.println("\npost-save: ");
+                System.out.println("\nviewer post-save: ");
                 for (Object o : viewerTest) {
                     System.out.print(o + " ");
                 }
@@ -380,6 +505,9 @@ public class Gui extends Application {
 
             updateLineWindow.close();
         });
+        remove.setBackground(buttonBackground);
+        remove.setOnMouseEntered(event -> remove.setBackground(buttonSelectedBackground));
+        remove.setOnMouseExited(event -> remove.setBackground(buttonBackground));
         pane.add(remove, 3, 10);
 
         Scene mainWindow = new Scene(pane, 600, 400);
@@ -421,7 +549,7 @@ public class Gui extends Application {
 
     private boolean isNumeric(String str) {
         try {
-            Integer.parseInt(str);
+            Double.parseDouble(str);
         } catch (NumberFormatException e) {
             return false;
         }
@@ -435,19 +563,22 @@ public class Gui extends Application {
         pane.setHgap(10);
         pane.setVgap(10);
         pane.setPadding(new Insets(10, 10, 10, 10));
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(pane);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        pane.setBackground(midGreyBackground);
+//        ScrollPane scrollPane = new ScrollPane();
+//        scrollPane.setContent(pane);
+//        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+//        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 
         Text lineTitle = new Text("New Line");
-        lineTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 20));
+        lineTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
+        lineTitle.setFill(Color.WHITE);
         pane.add(lineTitle, 0, 0);
 
-        Font labelFont = Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 16);
+        Font labelFont = Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18);
 
         Label startXLabel = new Label("Start X");
         startXLabel.setFont(labelFont);
+        startXLabel.setTextFill(Color.WHITE);
         TextField startX = new TextField();
         startX.setPrefWidth(70);
         pane.add(startXLabel, 0, 1);
@@ -457,6 +588,7 @@ public class Gui extends Application {
 
         Label startYLabel = new Label("Start Y");
         startYLabel.setFont(labelFont);
+        startYLabel.setTextFill(Color.WHITE);
         TextField startY = new TextField();
         startY.setPrefWidth(70);
         pane.add(startYLabel, 3, 1);
@@ -464,6 +596,7 @@ public class Gui extends Application {
 
         Label endXLabel = new Label("End X");
         endXLabel.setFont(labelFont);
+        endXLabel.setTextFill(Color.WHITE);
         TextField endX = new TextField();
         endX.setPrefWidth(70);
         pane.add(endXLabel, 0, 2);
@@ -473,6 +606,7 @@ public class Gui extends Application {
 
         Label endYLabel = new Label("End Y");
         endYLabel.setFont(labelFont);
+        endYLabel.setTextFill(Color.WHITE);
         TextField endY = new TextField();
         endY.setPrefWidth(70);
         pane.add(endYLabel, 3, 2);
@@ -480,6 +614,7 @@ public class Gui extends Application {
 
         Label startChangeInXLabel = new Label("Start Change in X");
         startChangeInXLabel.setFont(labelFont);
+        startChangeInXLabel.setTextFill(Color.WHITE);
         TextField startChangeInX = new TextField();
         startChangeInX.setPrefWidth(70);
         pane.add(startChangeInXLabel, 0, 3);
@@ -489,6 +624,7 @@ public class Gui extends Application {
 
         Label startChangeInYLabel = new Label("Start Change In Y");
         startChangeInYLabel.setFont(labelFont);
+        startChangeInYLabel.setTextFill(Color.WHITE);
         TextField startChangeInY = new TextField();
         startChangeInY.setPrefWidth(70);
         pane.add(startChangeInYLabel, 3, 3);
@@ -496,6 +632,7 @@ public class Gui extends Application {
 
         Label endChangeInXLabel = new Label("End Change in X");
         endChangeInXLabel.setFont(labelFont);
+        endChangeInXLabel.setTextFill(Color.WHITE);
         TextField endChangeInX = new TextField();
         endChangeInX.setPrefWidth(70);
         pane.add(endChangeInXLabel, 0, 4);
@@ -505,6 +642,7 @@ public class Gui extends Application {
 
         Label endChangeInYLabel = new Label("End Change In Y");
         endChangeInYLabel.setFont(labelFont);
+        endChangeInYLabel.setTextFill(Color.WHITE);
         TextField endChangeInY = new TextField();
         endChangeInY.setPrefWidth(70);
         pane.add(endChangeInYLabel, 3, 4);
@@ -514,6 +652,7 @@ public class Gui extends Application {
 
         Label iterationsLabel = new Label("Iterations");
         iterationsLabel.setFont(labelFont);
+        iterationsLabel.setTextFill(Color.WHITE);
         TextField iterations = new TextField();
         iterations.setPrefWidth(70);
         pane.add(iterationsLabel, 0, 6);
@@ -523,6 +662,7 @@ public class Gui extends Application {
 
         Label lineNameLabel = new Label("Line Name");
         lineNameLabel.setFont(labelFont);
+        lineNameLabel.setTextFill(Color.WHITE);
         TextField lineName = new TextField();
         lineName.setPrefWidth(100);
         pane.add(lineNameLabel, 0, 8);
@@ -564,7 +704,7 @@ public class Gui extends Application {
 
                     previousThisLineName[0] = new Text(line.getName());
                     previousThisLineName[0].setFill(Color.WHITE);
-                    previousThisLineName[0].setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                    previousThisLineName[0].setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
                     previousThisLineName[0].setOnMouseClicked(event1 -> {
                         if (event1.getButton().equals(MouseButton.PRIMARY) && event1.getClickCount() == 2) {
                             updateLineAlgorithm(line.getName());
@@ -593,6 +733,9 @@ public class Gui extends Application {
                 }
             }
         });
+        preview.setBackground(buttonBackground);
+        preview.setOnMouseEntered(event -> preview.setBackground(buttonSelectedBackground));
+        preview.setOnMouseExited(event -> preview.setBackground(buttonBackground));
         pane.add(preview, 0, 10);
 
         Button save = new Button("Save");
@@ -660,7 +803,7 @@ public class Gui extends Application {
                     algorithmicShapes.add(line);
                     Text thisLineName = new Text(line.getName());
                     thisLineName.setFill(Color.WHITE);
-                    thisLineName.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 20));
+                    thisLineName.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
                     thisLineName.setOnMouseClicked(event1 -> {
                         if (event1.getButton().equals(MouseButton.PRIMARY) && event1.getClickCount() == 2) {
                             updateLineAlgorithm(line.getName());
@@ -700,7 +843,7 @@ public class Gui extends Application {
 //                previousThisLineName[0] = null;
 
                 Object[] viewerTest = viewer.getChildren().toArray();
-                System.out.println("\npost-save: ");
+                System.out.println("\nviewer post-save: ");
                 for (Object o : viewerTest) {
                     System.out.print(o + " ");
                 }
@@ -708,6 +851,9 @@ public class Gui extends Application {
                 newLineWindow.close();
             }
         });
+        save.setBackground(buttonBackground);
+        save.setOnMouseEntered(event -> save.setBackground(buttonSelectedBackground));
+        save.setOnMouseExited(event -> save.setBackground(buttonBackground));
         pane.add(save, 2, 10);
 
         Button cancel = new Button("Cancel");
@@ -725,10 +871,14 @@ public class Gui extends Application {
 
             newLineWindow.close();
         });
+        cancel.setBackground(buttonBackground);
+        cancel.setOnMouseEntered(event -> cancel.setBackground(buttonSelectedBackground));
+        cancel.setOnMouseExited(event -> cancel.setBackground(buttonBackground));
         pane.add(cancel, 4, 10);
 
         return new Object[]{newLineWindow, pane, startX, startY, endX, endY, startChangeInX, startChangeInY,
                 endChangeInX, endChangeInY, iterations, lineName, preview, save, cancel, previousPreview,
                 previousPreviewPane, previousThisLineName};
     }
+
 }
