@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -35,6 +36,9 @@ public class Gui extends Application {
     private ComboBox<String> newShape = new ComboBox<>();
     private VBox fileContainer = new VBox();
     private VBox fileVBox = new VBox();
+    private StackPane viewerTools = new StackPane();
+    private Boolean gridState = false;
+    private Boolean centerCrosshair = false;
 
     // DATA Variables
     private ArrayList<AlgorithmicShape> algorithmicShapes = new ArrayList<>();
@@ -75,7 +79,7 @@ public class Gui extends Application {
         // viewer
         viewer.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
         viewer.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
-        viewer.setStyle("-fx-border-color: black; -fx-border-width: 1");
+//        viewer.setStyle("-fx-border-color: black; -fx-border-width: 1");
 
         // Menu bar edits
         menuBar.setAlignment(Pos.CENTER_LEFT);
@@ -112,6 +116,9 @@ public class Gui extends Application {
 
         // Edit Controls
         // guides
+        viewer.getChildren().add(viewerTools);
+        viewerTools.maxWidthProperty().bind(viewer.widthProperty());
+        viewerTools.maxHeightProperty().bind(viewer.heightProperty());
 //        Label guidesLabel = new Label("Guides");
 //        guidesLabel.setTextFill(Color.WHITE);
 //        guidesLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
@@ -124,23 +131,95 @@ public class Gui extends Application {
 
         Button center = new Button("Center");
         center.setBackground(buttonBackground);
-        center.setOnMouseEntered(event -> center.setBackground(buttonSelectedBackground));
-        center.setOnMouseExited(event -> center.setBackground(buttonBackground));
+        center.setOnMouseEntered(event -> {
+            if (!centerCrosshair) {
+                center.setBackground(buttonSelectedBackground);
+            }
+        });
+        center.setOnMouseExited(event -> {
+            if (!centerCrosshair) {
+                center.setBackground(buttonBackground);
+            }
+        });
+        Pane centerPane = new Pane();
+
+        Line vertLine = new Line(0, -10, 0, 10);
+        vertLine.translateXProperty().bind(viewer.widthProperty().divide(2));
+        vertLine.translateYProperty().bind(viewer.heightProperty().divide(2));
+        vertLine.setStrokeWidth(2);
+        vertLine.setStroke(Color.RED);
+
+        Line horizLine = new Line(-10, 0, 10, 0);
+        horizLine.translateXProperty().bind(viewer.widthProperty().divide(2));
+        horizLine.translateYProperty().bind(viewer.heightProperty().divide(2));
+        horizLine.setStrokeWidth(2);
+        horizLine.setStroke(Color.RED);
+
+        centerPane.getChildren().addAll(vertLine, horizLine);
+
         center.setOnAction(event -> {
+            if (centerCrosshair) {
+                viewerTools.getChildren().remove(centerPane);
+                center.setBackground(buttonBackground);
+                centerCrosshair = false;
+            } else {
+                viewerTools.getChildren().add(centerPane);
+                center.setBackground(buttonSelectedBackground);
+                centerCrosshair = true;
+            }
+
             System.out.println("center selected");
         });
 
         Button grid = new Button("Grid");
         grid.setBackground(buttonBackground);
-        grid.setOnMouseEntered(event -> grid.setBackground(buttonSelectedBackground));
-        grid.setOnMouseExited(event -> grid.setBackground(buttonBackground));
+        grid.setOnMouseEntered(event -> {
+            if (!gridState) {
+                grid.setBackground(buttonSelectedBackground);
+            }
+        });
+        grid.setOnMouseExited(event -> {
+            if (!gridState) {
+                grid.setBackground(buttonBackground);
+            }
+        });
+
+        Pane viewerGridPane = new Pane();
+        for (int i = -600; i <= 600; i += 50) {
+            Line vert = new Line(i, -600, i, 600);
+            vert.setStroke(new Color(0,0,0,0.2));
+            vert.translateXProperty().bind(viewer.widthProperty().divide(2));
+            vert.translateYProperty().bind(viewer.heightProperty().divide(2));
+
+            Line horiz = new Line(-600, i, 600, i);
+            horiz.setStroke(new Color(0, 0, 0, 0.2));
+            horiz.translateXProperty().bind(viewer.widthProperty().divide(2));
+            horiz.translateYProperty().bind(viewer.heightProperty().divide(2));
+
+            viewerGridPane.getChildren().addAll(vert, horiz);
+        }
+
         grid.setOnAction(event -> {
+            if (gridState) {
+                viewerTools.getChildren().remove(viewerGridPane);
+                grid.setBackground(buttonBackground);
+                gridState = false;
+            } else {
+                viewerTools.getChildren().add(viewerGridPane);
+                grid.setBackground(buttonSelectedBackground);
+                gridState = true;
+            }
+
             System.out.println("grid selected");
         });
 
         guides.getChildren().addAll(center, grid);
 
         // rotate
+        Text rotateText = new Text("Rotate");
+        rotateText.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
+        rotateText.setFill(Color.WHITE);
+
         TextField rotate = new TextField("0.0");
         rotate.setPromptText("0.0");
         rotate.setMaxWidth(75);
@@ -152,22 +231,30 @@ public class Gui extends Application {
         });
 
         // zoom (scale)
-        TextField zoom = new TextField("0.0");
-        zoom.setPromptText("0.0");
+        Text zoomText = new Text("Zoom");
+        zoomText.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
+        zoomText.setFill(Color.WHITE);
+
+        TextField zoom = new TextField("1.0");
+        zoom.setPromptText("1.0");
         zoom.setMaxWidth(75);
         zoom.setBackground(buttonSelectedBackground);
         zoom.setOnAction(event -> {
-            if (isNumeric(zoom.getText())) {
-                Double zoomNumber = Double.parseDouble(zoom.getText()) / 10;
+            if (isNumeric(zoom.getText()) && Double.parseDouble(zoom.getText()) >= 0) {
+                Double zoomNumber = Double.parseDouble(zoom.getText());
                 viewer.setScaleX(zoomNumber);
                 viewer.setScaleY(zoomNumber);
+            } else {
+                zoom.setText("1.0");
+                viewer.setScaleX(1.0);
+                viewer.setScaleY(1.0);
             }
         });
 
         // Background Color (slider)
         // Grid lines
         // Center Crosshair
-        editVBox.getChildren().addAll(guides, rotate, zoom);
+        editVBox.getChildren().addAll(guides, rotateText, rotate, zoomText, zoom);
 
         // new shape
         newShape.getItems().addAll("Line");
@@ -186,17 +273,24 @@ public class Gui extends Application {
         newShape.setOnHiding(event -> newShape.setBackground(buttonBackground));
 
         // layers
+        StackPane layerTitlePane = new StackPane();
+        layerTitlePane.setPadding(new Insets(3, 3, 3, 3));
+        layerTitlePane.setBackground(darkGreyBackground);
+        layerTitlePane.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15).subtract(20));
+
         Text layerTitle = new Text("Layers");
         layerTitle.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
-
         layerTitle.setFill(Color.WHITE);
+
+        layerTitlePane.getChildren().add(layerTitle);
+
         layerContainer.setBackground(darkGreyBackground);
         layers.setBackground(darkGreyBackground);
 
         layerContainer.setSpacing(10);
         editVBox.setSpacing(10);
         editVBox.setPadding(new Insets(10, 20, 10, 20));
-        editVBox.getChildren().addAll(newShape, layerTitle, layers);
+        editVBox.getChildren().addAll(newShape, layerTitlePane, layers);
 
         layers.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         layers.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
