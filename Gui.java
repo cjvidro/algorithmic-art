@@ -15,8 +15,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-
 /**
  * Gui for algorithmic art application
  *
@@ -119,10 +117,6 @@ public class Gui extends Application {
         viewer.getChildren().add(viewerTools);
         viewerTools.maxWidthProperty().bind(viewer.widthProperty());
         viewerTools.maxHeightProperty().bind(viewer.heightProperty());
-//        Label guidesLabel = new Label("Guides");
-//        guidesLabel.setTextFill(Color.WHITE);
-//        guidesLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
-//        guidesLabel.setOnMouseClicked(event -> addGuides());
 
         HBox guides = new HBox();
         guides.setAlignment(Pos.CENTER);
@@ -241,7 +235,7 @@ public class Gui extends Application {
         zoom.setBackground(buttonSelectedBackground);
         zoom.setOnAction(event -> {
             if (isNumeric(zoom.getText()) && Double.parseDouble(zoom.getText()) >= 0) {
-                Double zoomNumber = Double.parseDouble(zoom.getText());
+                double zoomNumber = Double.parseDouble(zoom.getText());
                 viewer.setScaleX(zoomNumber);
                 viewer.setScaleY(zoomNumber);
             } else {
@@ -252,8 +246,7 @@ public class Gui extends Application {
         });
 
         // Background Color (slider)
-        // Grid lines
-        // Center Crosshair
+
         editVBox.getChildren().addAll(guides, rotateText, rotate, zoomText, zoom);
 
         // new shape
@@ -491,9 +484,9 @@ public class Gui extends Application {
         Pane[] adjustedPane = {adjustedLine.draw(viewer, layerPanes)};
 
         // add new data to be displayed and stored in data lists
-        algorithmicShapes.add(adjustedLine);
+        algorithmicShapes.addLast(adjustedLine);
         layerContainer.getChildren().add(adjustedText);
-        layerTextList.add(adjustedText);
+        layerTextList.addLast(adjustedText);
 
         // remove old data
         algorithmicShapes.remove(outdatedLine[0]);
@@ -577,9 +570,9 @@ public class Gui extends Application {
             layerTextList.remove(adjustedText);
 
             // restore original function
-            algorithmicShapes.add(outdatedLine[0]);
+            algorithmicShapes.addLast(outdatedLine[0]);
             layerContainer.getChildren().add(outdatedText[0]);
-            layerTextList.add(outdatedText[0]);
+            layerTextList.addLast(outdatedText[0]);
             outdatedLine[0].draw(viewer, layerPanes);
 
             updateLineWindow.close();
@@ -794,7 +787,7 @@ public class Gui extends Application {
                 if (previousPreview[0] == null) {
                     // brand new preview
                     previousPreview[0] = line;
-                    algorithmicShapes.add(line);
+                    algorithmicShapes.addLast(line);
 
                     previousThisLineName[0] = new Text(line.getName());
                     previousThisLineName[0].setFill(Color.WHITE);
@@ -805,7 +798,7 @@ public class Gui extends Application {
                         }
                     });
                     layerContainer.getChildren().add(previousThisLineName[0]);
-                    layerTextList.add(previousThisLineName[0]);
+                    layerTextList.addLast(previousThisLineName[0]);
 
                     previousPreviewPane[0] = line.draw(viewer, layerPanes);
                     System.out.println("Line " + line.getName() + " previewed!");
@@ -817,7 +810,7 @@ public class Gui extends Application {
 
                     // add new references
                     previousPreview[0] = line;
-                    algorithmicShapes.add(line);
+                    algorithmicShapes.addLast(line);
 
                     // update text name
                     previousThisLineName[0].setText(line.getName());
@@ -894,7 +887,7 @@ public class Gui extends Application {
                 // user did not preview
                 if (previousPreview[0] == null) {
                     // this is a new line
-                    algorithmicShapes.add(line);
+                    algorithmicShapes.addLast(line);
                     Text thisLineName = new Text(line.getName());
                     thisLineName.setFill(Color.WHITE);
                     thisLineName.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
@@ -904,7 +897,7 @@ public class Gui extends Application {
                         }
                     });
                     layerContainer.getChildren().add(thisLineName);
-                    layerTextList.add(thisLineName);
+                    layerTextList.addLast(thisLineName);
                 }
                 // preview has the exact same contents as the to-save line
                 else if (line.getStartX() == previousPreview[0].getStartX() && line.getStartY() == previousPreview[0].getStartY()
@@ -922,7 +915,7 @@ public class Gui extends Application {
                     algorithmicShapes.remove(previousPreview[0]);
 
                     // add new references
-                    algorithmicShapes.add(line);
+                    algorithmicShapes.addLast(line);
 
                     // update text name
                     previousThisLineName[0].setText(line.getName());
@@ -974,5 +967,4 @@ public class Gui extends Application {
                 endChangeInX, endChangeInY, iterations, lineName, preview, save, cancel, previousPreview,
                 previousPreviewPane, previousThisLineName};
     }
-
 }

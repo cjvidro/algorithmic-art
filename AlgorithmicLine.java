@@ -2,8 +2,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-import java.util.ArrayList;
-
 /**
  * AlgorithmicLine object
  *
@@ -118,7 +116,7 @@ public class AlgorithmicLine extends AlgorithmicShape {
             return draw(viewer, layerPane, paneList, startX + startDx, startY + startDy, endX + endDx, endY + endDy, --remainingIterations);
         } else {
             viewer.getChildren().addAll(layerPane);
-            paneList.add(layerPane);
+            paneList.addLast(layerPane);
             //System.out.println("\nAdded: " + layerPane.toString());
             return layerPane;
         }
