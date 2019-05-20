@@ -4,7 +4,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -77,7 +76,6 @@ public class Gui extends Application {
         // viewer
         viewer.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
         viewer.maxWidthProperty().bind(mainWindow.widthProperty().multiply(0.7));
-//        viewer.setStyle("-fx-border-color: black; -fx-border-width: 1");
 
         // Menu bar edits
         menuBar.setAlignment(Pos.CENTER_LEFT);
@@ -368,7 +366,7 @@ public class Gui extends Application {
 
     // triggers the window to add a new line
     private void AddNewLineAlgorithm() {
-        LineWindow lineWindow = new LineWindow(layerPanes, layerContainer, viewer);
+        LineWindow lineWindow = new LineWindow(layerPanes, layerContainer, viewer, this);
 
         Stage newLineWindow = lineWindow.getStage();
         GridPane pane = lineWindow.getPane();
@@ -380,255 +378,17 @@ public class Gui extends Application {
         newLineWindow.show();
     }
 
-//    private void updateLineAlgorithm(String lineName, OrderedPane[] previousOrderedPane) {
-//        // Object[] lineStageElements = {newLineWindow, pane,  startX, startY, endX, endY, startChangeInX,
-//        //                                 0              1       2       3      4     5         6
-//        //
-//        // startChangeInY, endChangeInX, endChangeInY, iterations, lineName, preview, save, cancel
-//        //       7              8             9            10         11        12     13     14
-//        //
-//        // previousPreview, previousPreviewPane, previousThisLineName};
-//        //       15                  16                17
-//
-//
-//        // get the line stage and all of its elements
-//        Object[] lineStageElements = getLineStage();
-//        Stage updateLineWindow = (Stage) lineStageElements[0];
-//        GridPane pane = (GridPane) lineStageElements[1];
-//        TextField startX = (TextField) lineStageElements[2];
-//        TextField startY = (TextField) lineStageElements[3];
-//        TextField endX = (TextField) lineStageElements[4];
-//        TextField endY = (TextField) lineStageElements[5];
-//        TextField startChangeInX = (TextField) lineStageElements[6];
-//        TextField startChangeInY = (TextField) lineStageElements[7];
-//        TextField endChangeInX = (TextField) lineStageElements[8];
-//        TextField endChangeInY = (TextField) lineStageElements[9];
-//        TextField iterations = (TextField) lineStageElements[10];
-//        TextField thisLineName = (TextField) lineStageElements[11];
-//        Button preview = (Button) lineStageElements[12];
-//        Button save = (Button) lineStageElements[13];
-//        Button cancel = (Button) lineStageElements[14];
-//        //AlgorithmicLine[] previousPreview = (AlgorithmicLine[]) lineStageElements[15];
-//        Pane[] previousPreviewPane = (Pane[]) lineStageElements[16];
-//        //Text[] previousThisLineName = (Text[]) lineStageElements[17];
-//
-//        // old data
-//        AlgorithmicLine outdatedLine = null;
-//        OrderedText outdatedText = null;
-//
-//        //TODO check for the object instead of the name?
-//        for (AlgorithmicShape shape : algorithmicShapes) {
-//            if (shape.getName().equals(lineName)) {
-//                outdatedLine = (AlgorithmicLine) shape;
-//                break;
-//            }
-//        }
-//
-//        if (outdatedLine == null) {
-//            throw new RuntimeException("No Previous AlgorithmicLine Found!");
-//        }
-//
-//        for (OrderedText text : layerTextList) {
-//            if (text.getText().equals(lineName)) {
-//                outdatedText = text;
-//                break;
-//            }
-//        }
-//
-//        if (outdatedText == null) {
-//            throw new RuntimeException("No Previous layer name Found!");
-//        }
-//
-//        // Set prompt Text in window
-//        startX.setPromptText(outdatedLine.getStartX() + "");
-//        startY.setPromptText(outdatedLine.getStartY() + "");
-//        endX.setPromptText(outdatedLine.getEndX() + "");
-//        endY.setPromptText(outdatedLine.getEndY() + "");
-//        startChangeInX.setPromptText(outdatedLine.getStartDx() + "");
-//        startChangeInY.setPromptText(outdatedLine.getStartDy() + "");
-//        endChangeInX.setPromptText(outdatedLine.getEndDx() + "");
-//        endChangeInY.setPromptText(outdatedLine.getEndDy() + "");
-//        iterations.setPromptText(outdatedLine.getIterations() + "");
-//        thisLineName.setPromptText(outdatedLine.getName() + "");
-//
-//        // set actual text in window
-//        startX.setText(outdatedLine.getStartX() + "");
-//        startY.setText(outdatedLine.getStartY() + "");
-//        endX.setText(outdatedLine.getEndX() + "");
-//        endY.setText(outdatedLine.getEndY() + "");
-//        startChangeInX.setText(outdatedLine.getStartDx() + "");
-//        startChangeInY.setText(outdatedLine.getStartDy() + "");
-//        endChangeInX.setText(outdatedLine.getEndDx() + "");
-//        endChangeInY.setText(outdatedLine.getEndDy() + "");
-//        iterations.setText(outdatedLine.getIterations() + "");
-//        thisLineName.setText(outdatedLine.getName() + "");
-//
-//        // new data
-//        AlgorithmicLine adjustedLine = new AlgorithmicLine(
-//                outdatedLine.getStartX(),
-//                -outdatedLine.getStartY(),
-//                outdatedLine.getEndX(),
-//                -outdatedLine.getEndY(),
-//                outdatedLine.getStartDx(),
-//                -outdatedLine.getStartDy(),
-//                outdatedLine.getEndDx(),
-//                -outdatedLine.getEndDy(),
-//                outdatedLine.getIterations(),
-//                outdatedLine.getName());
-//
-//        OrderedText adjustedText = new OrderedText(outdatedText.getText());
-//        adjustedText.setFill(Color.WHITE);
-//        adjustedText.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
-//        adjustedText.setOnMouseClicked(event1 -> {
-//            if (event1.getButton().equals(MouseButton.PRIMARY) && event1.getClickCount() == 2) {
-//                updateLineAlgorithm(adjustedLine.getName(), previousOrderedPane);
-//            }
-//        });
-//        Pane[] adjustedPane = {adjustedLine.draw(viewer, previousOrderedPane[0], layerPanes)};
-//
-//        // add new data to be displayed and stored in data lists
-//        algorithmicShapes.addLast(adjustedLine);
-//        layerContainer.getChildren().add(adjustedText);
-//        layerTextList.addLast(adjustedText);
-//
-//        // remove old data
-//        algorithmicShapes.remove(outdatedLine);
-//        layerContainer.getChildren().remove(outdatedText);
-//        layerTextList.remove(outdatedText);
-//        viewer.getChildren().remove(previousPreviewPane[0]);
-//
-//        int oldIndex = viewer.getChildren().indexOf(outdatedLine);
-//
-////        Object[] viewerTest = viewer.getChildren().toArray();
-////        System.out.println("\nBefore: ");
-////        for (Object o : viewerTest) {
-////            System.out.print(o + " ");
-////        }
-//
-////        System.out.println("\n\nAttempting to remove " + lineStageElements[16].toString());
-//        viewer.getChildren().remove(oldIndex + 1);
-//
-////        viewerTest = viewer.getChildren().toArray();
-////        System.out.println("\nAfter: ");
-////        for (Object o : viewerTest) {
-////            System.out.print((o) + " ");
-////        }
-//
-//        // update buttons
-//        preview.setOnAction(event -> {
-//            if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
-//                    startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), thisLineName.getText())) {
-//
-//                adjustedLine.setStartX(Integer.parseInt(startX.getText()));
-//                adjustedLine.setStartY(Integer.parseInt(startY.getText()));
-//                adjustedLine.setEndX(Integer.parseInt(endX.getText()));
-//                adjustedLine.setEndY(Integer.parseInt(endY.getText()));
-//                adjustedLine.setStartDx(Integer.parseInt(startChangeInX.getText()));
-//                adjustedLine.setStartDy(Integer.parseInt(startChangeInY.getText()));
-//                adjustedLine.setEndDx(Integer.parseInt(endChangeInX.getText()));
-//                adjustedLine.setEndDy(Integer.parseInt(endChangeInY.getText()));
-//                adjustedLine.setIterations(Integer.parseInt(iterations.getText()));
-//                adjustedLine.setName(thisLineName.getText());
-//                adjustedText.setText(thisLineName.getText());
-//
-//                viewer.getChildren().remove(adjustedPane[0]);
-//                adjustedPane[0] = adjustedLine.draw(viewer, previousOrderedPane[0], layerPanes);
-//            }
-//        });
-//
-//        save.setOnAction(event -> {
-//            if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
-//                    startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), thisLineName.getText())) {
-//
-//                adjustedLine.setStartX(Integer.parseInt(startX.getText()));
-//                adjustedLine.setStartY(Integer.parseInt(startY.getText()));
-//                adjustedLine.setEndX(Integer.parseInt(endX.getText()));
-//                adjustedLine.setEndY(Integer.parseInt(endY.getText()));
-//                adjustedLine.setStartDx(Integer.parseInt(startChangeInX.getText()));
-//                adjustedLine.setStartDy(Integer.parseInt(startChangeInY.getText()));
-//                adjustedLine.setEndDx(Integer.parseInt(endChangeInX.getText()));
-//                adjustedLine.setEndDy(Integer.parseInt(endChangeInY.getText()));
-//                adjustedLine.setIterations(Integer.parseInt(iterations.getText()));
-//                adjustedLine.setName(thisLineName.getText());
-//                adjustedText.setText(thisLineName.getText());
-//
-//                viewer.getChildren().remove(adjustedPane[0]);
-//                adjustedPane[0] = adjustedLine.draw(viewer, previousOrderedPane[0], layerPanes);
-//
-//                Object[] viewerTest = viewer.getChildren().toArray();
-//                System.out.println("\nviewer post-save: ");
-//                for (Object o : viewerTest) {
-//                    System.out.print(o + " ");
-//                }
-//
-//                updateLineWindow.close();
-//            }
-//        });
-//
-//        AlgorithmicLine finalOutdatedLine = outdatedLine;
-//        OrderedText finalOutdatedText = outdatedText;
-//        cancel.setOnAction(event -> {
-//            // remove any changes
-//            viewer.getChildren().remove(adjustedPane[0]);
-//            algorithmicShapes.remove(adjustedLine);
-//            layerContainer.getChildren().remove(adjustedText);
-//            layerTextList.remove(adjustedText);
-//
-//            // restore original function
-//            algorithmicShapes.addLast(finalOutdatedLine);
-//            layerContainer.getChildren().add(finalOutdatedText);
-//            layerTextList.addLast(finalOutdatedText);
-//            finalOutdatedLine.draw(viewer, previousOrderedPane[0], layerPanes);
-//
-//            updateLineWindow.close();
-//        });
-//
-//        // move buttons, add remove button
-//        pane.getChildren().remove(save);
-//        pane.add(save, 1, 10);
-//
-//        // TODO This doesn't actually remove the shape from the viewer?
-//        Button remove = new Button("Remove");
-//        remove.setOnAction(event -> {
-//            // remove any changes
-//            viewer.getChildren().remove(adjustedPane[0]);
-//            algorithmicShapes.remove(adjustedLine);
-//            layerContainer.getChildren().remove(adjustedText);
-//            layerTextList.remove(adjustedText);
-//
-//            updateLineWindow.close();
-//        });
-//        remove.setBackground(buttonBackground);
-//        remove.setOnMouseEntered(event -> remove.setBackground(buttonSelectedBackground));
-//        remove.setOnMouseExited(event -> remove.setBackground(buttonBackground));
-//        pane.add(remove, 3, 10);
-//
-//        Scene mainWindow = new Scene(pane, 600, 400);
-//        updateLineWindow.setScene(mainWindow);
-//        updateLineWindow.setTitle("Algorithmic Art - Update Line");
-//        updateLineWindow.initModality(Modality.APPLICATION_MODAL);
-//        updateLineWindow.show();
-//    }
+    public void updateLineAlgorithm(OrderedPane orderedPane) {
+        LineWindow lineWindow = new LineWindow(layerPanes, layerContainer, viewer, orderedPane, this);
 
-    private Boolean isValidLine(String startX, String startY, String endX, String endY, String startChangeInX,
-                                String startChangeInY, String endChangeInX, String endChangeInY, String iterations,
-                                String lineName) {
+        Stage newLineWindow = lineWindow.getStage();
+        GridPane pane = lineWindow.getPane();
 
-        if (startX != null && isNumeric(startX)
-                && startY != null && isNumeric(startY)
-                && endX != null && isNumeric(endX)
-                && endY != null && isNumeric(endY)
-                && startChangeInX != null && isNumeric(startChangeInX)
-                && startChangeInY != null && isNumeric(startChangeInY)
-                && endChangeInX != null && isNumeric(endChangeInX)
-                && endChangeInY != null && isNumeric(endChangeInY)
-                && iterations != null && isNumeric(iterations) && Integer.parseInt(iterations) > 0
-                && lineName != null && !lineName.equals("")) {
-            return true;
-        }
-
-        System.out.println("This line does not have valid parameters!");
-        return false;
+        Scene mainWindow = new Scene(pane, 600, 400);
+        newLineWindow.setScene(mainWindow);
+        newLineWindow.setTitle("Algorithmic Art - Update Line (" + orderedPane.getAlgorithmicShape().getName() + ")");
+        newLineWindow.initModality(Modality.APPLICATION_MODAL);
+        newLineWindow.show();
     }
 
     private boolean isNumeric(String str) {

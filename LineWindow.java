@@ -50,16 +50,18 @@ public class LineWindow {
     private ArrayList<OrderedPane> layers;      // contains all layerPanes in order
     private VBox layerContainer;                // this where all of the layer names are displayed to the user
     private StackPane viewer;                   // the primary VIEWER
+    private static Gui gui;
 
     // temporary variables
     OrderedPane previousPreviewLayer = null;
     OrderedPane originalLayer = null;
 
     // sets up the entire window for creating NEW LINES (not updating an existing line)
-    public LineWindow(ArrayList<OrderedPane> layers, VBox layerContainer, StackPane viewer) {
+    public LineWindow(ArrayList<OrderedPane> layers, VBox layerContainer, StackPane viewer, Gui gui) {
         // create pane and Gridpane
         newLineWindow = new Stage();
         pane = new GridPane();
+        this.gui = gui;
 
         // save data and viewing variables
         this.layers = layers;
@@ -73,6 +75,32 @@ public class LineWindow {
         setupPreview();
         setupSave();
         setupCancel();
+    }
+
+    // sets up the entire window for UPDATING existing lines
+    public LineWindow(ArrayList<OrderedPane> layers, VBox layerContainer, StackPane viewer, OrderedPane originalLayer, Gui gui) {
+        // create pane and Gridpane
+        newLineWindow = new Stage();
+        pane = new GridPane();
+
+        // save data and viewing variables
+        this.layers = layers;
+        this.layerContainer = layerContainer;
+        this.viewer = viewer;
+        this.originalLayer = originalLayer;
+        this.previousPreviewLayer = originalLayer;
+        this.gui = gui;
+
+        // setup elements in the pane
+        setupPane();
+
+        // setup buttons
+        setupPreview();
+        setupSave();
+        setupCancel();
+
+        // update the textfields with new data
+        updateTextfields();
     }
 
     private Region getNewShapeSpacer() {
@@ -221,7 +249,7 @@ public class LineWindow {
                 // PARAMETERS ARE VALID
 
                 int index = getIndex();
-                previousPreviewLayer = new OrderedPane(index);
+                previousPreviewLayer = new OrderedPane(index, gui);
 
                 // create new algorithmic line with current data from user
                 AlgorithmicLine line = new AlgorithmicLine(
@@ -236,8 +264,8 @@ public class LineWindow {
                         Integer.parseInt(iterations.getText()),
                         lineName.getText());
 
-                // remove old preview
-                removeOldPreview(index);
+//                // remove old preview
+////                removeOldPreview(index);
 
                 // store the line to the preview layer
                 previousPreviewLayer.setAlgorithmicShape(line);
@@ -265,9 +293,9 @@ public class LineWindow {
             if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
                     startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), lineName.getText())) {
 
-                // Paramaters are valid
+                // Parameters are valid
                 int index = getIndex();
-                previousPreviewLayer = new OrderedPane(index);
+                previousPreviewLayer = new OrderedPane(index, gui);
 
                 // create new algorithmic line with current data from user
                 AlgorithmicLine line = new AlgorithmicLine(
@@ -282,9 +310,6 @@ public class LineWindow {
                         Integer.parseInt(iterations.getText()),
                         lineName.getText());
 
-                // remove old preview
-                removeOldPreview(index);
-
                 // store the line to the preview layer
                 previousPreviewLayer.setAlgorithmicShape(line);
                 previousPreviewLayer.setName(new Text(lineName.getText()));
@@ -294,6 +319,17 @@ public class LineWindow {
                 viewer.getChildren().add(index, previousPreviewLayer);
                 layers.add(index, previousPreviewLayer);
                 layerContainer.getChildren().add(index, previousPreviewLayer.getName());
+
+//                // remove old preview
+//                removeOldPreview(index);
+
+                for (OrderedPane p : layers) {
+                    System.out.print(p.name.getText() + "  |  ");
+                }
+
+                System.out.println("\nViewer size: " + viewer.getChildren().size());
+                System.out.println("Layers size: " + layers.size());
+                System.out.println("Layer Container size: " + layerContainer.getChildren().size() + "\n");
 
                 // close window
                 newLineWindow.close();
@@ -350,15 +386,47 @@ public class LineWindow {
             index = layers.size();
         }
 
+        System.out.println("Got index " + index);
+
         return index;
     }
 
     private void removeOldPreview(int index) {
-        if (previousPreviewLayer != null && index < layerContainer.getChildren().size()) {
+        if (previousPreviewLayer != null && index >= 0 && index < layerContainer.getChildren().size()) {
             viewer.getChildren().remove(index);
             layers.remove(index);
             layerContainer.getChildren().remove(index);
         }
+
+        System.out.println("New num of layers is " + viewer.getChildren().size());
+    }
+
+    private void updateTextfields() {
+        AlgorithmicLine outdatedLine = (AlgorithmicLine) originalLayer.getAlgorithmicShape();
+
+        // Set prompt Text in window
+        startX.setPromptText(outdatedLine.getStartX() + "");
+        startY.setPromptText(outdatedLine.getStartY() + "");
+        endX.setPromptText(outdatedLine.getEndX() + "");
+        endY.setPromptText(outdatedLine.getEndY() + "");
+        startChangeInX.setPromptText(outdatedLine.getStartDx() + "");
+        startChangeInY.setPromptText(outdatedLine.getStartDy() + "");
+        endChangeInX.setPromptText(outdatedLine.getEndDx() + "");
+        endChangeInY.setPromptText(outdatedLine.getEndDy() + "");
+        iterations.setPromptText(outdatedLine.getIterations() + "");
+        lineName.setPromptText(outdatedLine.getName() + "");
+
+        // set actual text in window
+        startX.setText(outdatedLine.getStartX() + "");
+        startY.setText(outdatedLine.getStartY() + "");
+        endX.setText(outdatedLine.getEndX() + "");
+        endY.setText(outdatedLine.getEndY() + "");
+        startChangeInX.setText(outdatedLine.getStartDx() + "");
+        startChangeInY.setText(outdatedLine.getStartDy() + "");
+        endChangeInX.setText(outdatedLine.getEndDx() + "");
+        endChangeInY.setText(outdatedLine.getEndDy() + "");
+        iterations.setText(outdatedLine.getIterations() + "");
+        lineName.setText(outdatedLine.getName() + "");
     }
 
     public Stage getStage() {
