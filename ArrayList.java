@@ -40,6 +40,10 @@ public class ArrayList<E> implements Iterable<E> {
 		return list[i];
 	}
 
+	public E get (E element) {
+		return get(search(element));
+	}
+
 	public E set(int i, E e) throws IndexOutOfBoundsException {
 		if (i < 0 || i >= size) {
 			throw new IndexOutOfBoundsException();
@@ -98,7 +102,7 @@ public class ArrayList<E> implements Iterable<E> {
 		 *  In this case, all elements, except the one removed, must be shifted, O(n - 1).
 		 *  Therefore the time complexity of this method is O(n).
 		 */
-		if (i < 0 || i >= size) {
+		if (i < 0 || i > size) {
 			throw new IndexOutOfBoundsException();
 		}
 		
@@ -121,7 +125,7 @@ public class ArrayList<E> implements Iterable<E> {
 	private int search (E element) {
 		int i = 0;
 		for (E e : list) {
-			if (e.equals(element)) {
+			if (e == element) {
 				return i;
 			}
 			i++;
