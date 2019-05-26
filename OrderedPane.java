@@ -11,10 +11,10 @@ public class OrderedPane extends javafx.scene.layout.Pane {
     private AlgorithmicShape algorithmicShape;
     Text name;
 
-    public OrderedPane(Gui gui) {
-        super();
-        this.gui = gui;
-    }
+//    public OrderedPane(Gui gui) {
+//        super();
+//        this.gui = gui;
+//    }
 
     public OrderedPane(int index, Gui gui) {
         super();

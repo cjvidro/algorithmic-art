@@ -19,7 +19,7 @@ public class AlgorithmicLine extends AlgorithmicShape {
 
     // constructors
     public AlgorithmicLine(int startX, int startY, int endX, int endY, int startDx, int startDy,
-                           int endDx, int endDy, int iterations, String name) {
+                           int endDx, int endDy, int iterations, String name, Boolean first) {
         this.startX = startX;
         this.startY = -startY;
         this.endX = endX;
@@ -30,6 +30,14 @@ public class AlgorithmicLine extends AlgorithmicShape {
         this.endDy = -endDy;
         this.setIterations(iterations);
         this.setName(name);
+
+        // undos the adjustment that happened uneededly
+        if (!first) {
+            this.startY = -this.startY;
+            this.endY = -this.endY;
+            this.startDy = -this.startDy;
+            this.endDy = -this.endDy;
+        }
     }
 
     // getters and setters

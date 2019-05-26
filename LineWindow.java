@@ -51,6 +51,7 @@ public class LineWindow {
     private VBox layerContainer;                // this where all of the layer names are displayed to the user
     private StackPane viewer;                   // the primary VIEWER
     private static Gui gui;
+    Boolean first;
 
     // temporary variables
     OrderedPane previousPreviewLayer = null;
@@ -58,10 +59,11 @@ public class LineWindow {
 
     // sets up the entire window for creating NEW LINES (not updating an existing line)
     public LineWindow(ArrayList<OrderedPane> layers, VBox layerContainer, StackPane viewer, Gui gui) {
-        // create pane and Gridpane
+        // create pane and grid pane
         newLineWindow = new Stage();
         pane = new GridPane();
         this.gui = gui;
+        first = true;
 
         // save data and viewing variables
         this.layers = layers;
@@ -79,9 +81,10 @@ public class LineWindow {
 
     // sets up the entire window for UPDATING existing lines
     public LineWindow(ArrayList<OrderedPane> layers, VBox layerContainer, StackPane viewer, OrderedPane originalLayer, Gui gui) {
-        // create pane and Gridpane
+        // create pane and grid pane
         newLineWindow = new Stage();
         pane = new GridPane();
+        first = false;
 
         // save data and viewing variables
         this.layers = layers;
@@ -262,10 +265,7 @@ public class LineWindow {
                         Integer.parseInt(endChangeInX.getText()),
                         Integer.parseInt(endChangeInY.getText()),
                         Integer.parseInt(iterations.getText()),
-                        lineName.getText());
-
-//                // remove old preview
-////                removeOldPreview(index);
+                        lineName.getText(), first);
 
                 // store the line to the preview layer
                 previousPreviewLayer.setAlgorithmicShape(line);
@@ -289,7 +289,6 @@ public class LineWindow {
         Button save = new Button("Save");
         save.setOnAction(event -> {
             // follows same procedure as a preview, but takes finalization step to exit the window
-
             if (isValidLine(startX.getText(), startY.getText(), endX.getText(), endY.getText(), startChangeInX.getText(),
                     startChangeInY.getText(), endChangeInX.getText(), endChangeInY.getText(), iterations.getText(), lineName.getText())) {
 
@@ -308,7 +307,7 @@ public class LineWindow {
                         Integer.parseInt(endChangeInX.getText()),
                         Integer.parseInt(endChangeInY.getText()),
                         Integer.parseInt(iterations.getText()),
-                        lineName.getText());
+                        lineName.getText(), first);
 
                 // store the line to the preview layer
                 previousPreviewLayer.setAlgorithmicShape(line);
@@ -319,17 +318,6 @@ public class LineWindow {
                 viewer.getChildren().add(index, previousPreviewLayer);
                 layers.add(index, previousPreviewLayer);
                 layerContainer.getChildren().add(index, previousPreviewLayer.getName());
-
-//                // remove old preview
-//                removeOldPreview(index);
-
-                for (OrderedPane p : layers) {
-                    System.out.print(p.name.getText() + "  |  ");
-                }
-
-                System.out.println("\nViewer size: " + viewer.getChildren().size());
-                System.out.println("Layers size: " + layers.size());
-                System.out.println("Layer Container size: " + layerContainer.getChildren().size() + "\n");
 
                 // close window
                 newLineWindow.close();
@@ -385,8 +373,6 @@ public class LineWindow {
             // this is a new layer that hasn't been previewed
             index = layers.size();
         }
-
-        System.out.println("Got index " + index);
 
         return index;
     }
