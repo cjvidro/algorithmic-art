@@ -43,14 +43,14 @@ public class Gui extends Application {
     private ArrayList<OrderedPane> layerPanes = new ArrayList<>();
 
     // Color palette
-    private final Color darkGrey = Color.hsb(0,0,0.16);
+    private final Color darkGrey = Color.hsb(0, 0, 0.16);
     private final Background darkGreyBackground = new Background(new BackgroundFill(darkGrey, CornerRadii.EMPTY, Insets.EMPTY));
-    private final Color midGrey = Color.hsb(0,0,0.25);
+    private final Color midGrey = Color.hsb(0, 0, 0.25);
     private final Background midGreyBackground = new Background(new BackgroundFill(midGrey, CornerRadii.EMPTY, Insets.EMPTY));
-    private final Color lightGrey = Color.hsb(0,0,0.39);
+    private final Color lightGrey = Color.hsb(0, 0, 0.39);
     private final Background lightGreyBackground = new Background(new BackgroundFill(lightGrey, CornerRadii.EMPTY, Insets.EMPTY));
-    private final Background buttonBackground = new Background(new BackgroundFill(Color.hsb(  240,0.01,0.68), CornerRadii.EMPTY, Insets.EMPTY));
-    private final Background buttonSelectedBackground = new Background(new BackgroundFill(Color.hsb(  180,0.09,0.86), CornerRadii.EMPTY, Insets.EMPTY));
+    private final Background buttonBackground = new Background(new BackgroundFill(Color.hsb(240, 0.01, 0.68), CornerRadii.EMPTY, Insets.EMPTY));
+    private final Background buttonSelectedBackground = new Background(new BackgroundFill(Color.hsb(180, 0.09, 0.86), CornerRadii.EMPTY, Insets.EMPTY));
 
     public static void main(String[] args) {
         launch(args);
@@ -103,7 +103,7 @@ public class Gui extends Application {
         filePane.setPadding(new Insets(3, 3, 3, 3));
         filePane.setBackground(darkGreyBackground);
         filePane.minWidthProperty().bind(mainWindow.widthProperty().multiply(0.15).subtract(20));
-        Text fileText = new Text("File");
+        Text fileText = new Text("Files");
         fileText.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
         fileText.setFill(Color.WHITE);
         filePane.getChildren().add(fileText);
@@ -179,7 +179,7 @@ public class Gui extends Application {
         Pane viewerGridPane = new Pane();
         for (int i = -600; i <= 600; i += 50) {
             Line vert = new Line(i, -600, i, 600);
-            vert.setStroke(new Color(0,0,0,0.2));
+            vert.setStroke(new Color(0, 0, 0, 0.2));
             vert.translateXProperty().bind(viewer.widthProperty().divide(2));
             vert.translateYProperty().bind(viewer.heightProperty().divide(2));
 
@@ -278,7 +278,7 @@ public class Gui extends Application {
         layerContainer.setBackground(darkGreyBackground);
         layers.setBackground(darkGreyBackground);
 
-        layerContainer.setSpacing(10);
+        layerContainer.setSpacing(8);
         editVBox.setSpacing(10);
         editVBox.setPadding(new Insets(10, 20, 10, 20));
         editVBox.getChildren().addAll(newShape, layerTitlePane, layers);

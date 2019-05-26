@@ -1,4 +1,9 @@
+import javafx.geometry.Insets;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -9,12 +14,13 @@ public class OrderedPane extends javafx.scene.layout.Pane {
     private static Gui gui;
     private int index;
     private AlgorithmicShape algorithmicShape;
-    Text name;
+    HBox nameBox;
 
-//    public OrderedPane(Gui gui) {
-//        super();
-//        this.gui = gui;
-//    }
+    // color Palette
+    private final Color midGreen = Color.hsb(125, 0.16, 0.50);
+    private final Background midGreenBackground = new Background(new BackgroundFill(midGreen, CornerRadii.EMPTY, Insets.EMPTY));
+    private final Color darkGrey = Color.hsb(0, 0, 0.16);
+    private final Background darkGreyBackground = new Background(new BackgroundFill(darkGrey, CornerRadii.EMPTY, Insets.EMPTY));
 
     public OrderedPane(int index, Gui gui) {
         super();
@@ -26,10 +32,6 @@ public class OrderedPane extends javafx.scene.layout.Pane {
         return index;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
     public AlgorithmicShape getAlgorithmicShape() {
         return algorithmicShape;
     }
@@ -38,8 +40,8 @@ public class OrderedPane extends javafx.scene.layout.Pane {
         this.algorithmicShape = algorithmicShape;
     }
 
-    public Text getName() {
-        return name;
+    public HBox getName() {
+        return nameBox;
     }
 
     public void setName(Text name) {
@@ -47,7 +49,11 @@ public class OrderedPane extends javafx.scene.layout.Pane {
         adjustedText.setFill(Color.WHITE);
         adjustedText.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 18));
 
-        adjustedText.setOnMouseClicked(event -> {
+        nameBox = new HBox();
+        nameBox.setPadding(new Insets(2, 0, 0, 7));
+        nameBox.getChildren().add(adjustedText);
+
+        nameBox.setOnMouseClicked(event -> {
             if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
                 // trigger update algorithm
                 if (algorithmicShape instanceof AlgorithmicLine) {
@@ -56,6 +62,12 @@ public class OrderedPane extends javafx.scene.layout.Pane {
             }
         });
 
-        this.name = adjustedText;
+        nameBox.setBackground(darkGreyBackground);
+        nameBox.setOnMouseEntered(event -> {
+            nameBox.setBackground(midGreenBackground);
+        });
+        nameBox.setOnMouseExited(event -> {
+            nameBox.setBackground(darkGreyBackground);
+        });
     }
 }
