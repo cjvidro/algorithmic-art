@@ -260,10 +260,10 @@ public class LineWindow {
                         Integer.parseInt(startY.getText()),
                         Integer.parseInt(endX.getText()),
                         Integer.parseInt(endY.getText()),
-                        Integer.parseInt(startChangeInX.getText()),
-                        Integer.parseInt(startChangeInY.getText()),
-                        Integer.parseInt(endChangeInX.getText()),
-                        Integer.parseInt(endChangeInY.getText()),
+                        startChangeInX.getText(),
+                        startChangeInY.getText(),
+                        endChangeInX.getText(),
+                        endChangeInY.getText(),
                         Integer.parseInt(iterations.getText()),
                         lineName.getText(), first);
 
@@ -302,10 +302,10 @@ public class LineWindow {
                         Integer.parseInt(startY.getText()),
                         Integer.parseInt(endX.getText()),
                         Integer.parseInt(endY.getText()),
-                        Integer.parseInt(startChangeInX.getText()),
-                        Integer.parseInt(startChangeInY.getText()),
-                        Integer.parseInt(endChangeInX.getText()),
-                        Integer.parseInt(endChangeInY.getText()),
+                        startChangeInX.getText(),
+                        startChangeInY.getText(),
+                        endChangeInX.getText(),
+                        endChangeInY.getText(),
                         Integer.parseInt(iterations.getText()),
                         lineName.getText(), first);
 
