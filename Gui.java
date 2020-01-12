@@ -14,6 +14,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+// TODO: Make it so an iteration can be a double (e.g. every iteration is 0.2 instead of 1)
+
 /**
  * Gui for algorithmic art application
  *
@@ -366,7 +368,7 @@ public class Gui extends Application {
 
     // triggers the window to add a new line
     private void AddNewLineAlgorithm() {
-        LineWindow lineWindow = new LineWindow(layerPanes, layerContainer, viewer, this);
+        AddLineWindow lineWindow = new AddLineWindow(layerPanes, layerContainer, viewer, this);
 
         Stage newLineWindow = lineWindow.getStage();
         GridPane pane = lineWindow.getPane();
@@ -379,7 +381,7 @@ public class Gui extends Application {
     }
 
     public void updateLineAlgorithm(OrderedPane orderedPane) {
-        LineWindow lineWindow = new LineWindow(layerPanes, layerContainer, viewer, orderedPane, this);
+        AddLineWindow lineWindow = new AddLineWindow(layerPanes, layerContainer, viewer, orderedPane, this);
 
         Stage newLineWindow = lineWindow.getStage();
         GridPane pane = lineWindow.getPane();
